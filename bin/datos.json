@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "nombre": "Juan",
+    "apellidoPaterno": "Pérez",
+    "apellidoMaterno": "Gómez",
+    "usuario": "juan78",
+    "correo": "juan.perez@empresa.com",
+    "telefono": "5551234",
+    "id_empresa": 1
+  },
+  {
+    "id": 2,
+    "nombre": "María",
+    "apellidoPaterno": "Gómez",
+    "apellidoMaterno": "López",
+    "usuario": "maria92",
+    "correo": "maria.gomez@empresa.com",
+    "telefono": "5555678",
+    "id_empresa": 2
+  },
+  {
+    "id": 3,
+    "nombre": "Carlos",
+    "apellidoPaterno": "Ruiz",
+    "apellidoMaterno": "Fernández",
+    "usuario": "carlos89",
+    "correo": "carlos.ruiz@empresa.com",
+    "telefono": "5559876",
+    "id_empresa": 1
+  },
+  {
+    "id": 4,
+    "nombre": "Laura",
+    "apellidoPaterno": "Medina",
+    "apellidoMaterno": "Sánchez",
+    "usuario": "laura95",
+    "correo": "laura.medina@empresa.com",
+    "telefono": "5554321",
+    "id_empresa": 3
+  },
+  {
+    "id": 5,
+    "nombre": "Pedro",
+    "apellidoPaterno": "Ramírez",
+    "apellidoMaterno": "Torres",
+    "usuario": "pedro77",
+    "correo": "pedro.ramirez@empresa.com",
+    "telefono": "5556789",
+    "id_empresa": 2
+  },
+  {
+    "id": 6,
+    "nombre": "Sofía",
+    "apellidoPaterno": "Hernández",
+    "apellidoMaterno": "Martínez",
+    "usuario": "sofia88",
+    "correo": "sofia.hernandez@empresa.com",
+    "telefono": "5558765",
+    "id_empresa": 4
+  },
+  {
+    "id": 7,
+    "nombre": "Angeles",
+    "apellidoPaterno": "Vite",
+    "apellidoMaterno": "Vera",
+    "usuario": "angy792",
+    "correo": "angeles.vite@empresa.com",
+    "telefono": "7711913179",
+    "id_empresa": 5
+  }
+]
