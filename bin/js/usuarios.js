@@ -11,6 +11,7 @@ var usuarios;
 (function (usuarios) {
     class Usuarios {
         constructor() {
+            //Map<K,V> k: tipo de clave  V:tipo de valor  = se crea un nuevo mapa vacio 
             this.usuarios = new Map();
             this._ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios",
@@ -22,20 +23,22 @@ var usuarios;
                     console.log("La ventana de usuario fue cerrada");
                 },
             });
-            this._contenedor = this._ventana._contenedor;
+            this._conten = this._ventana._contenedor;
             this.crearControles();
             this.crearModalUsuario();
             this.crearTabla();
             this.cargar();
         }
+        // metodo asincrono, espera la respuesta sin bloquear el programa y regresa una promesa 
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
-                    const response = yield fetch("./datos.json");
+                    const response = yield fetch("./datos.json"); //await espera el resultado de una promesa 
                     const data = yield response.json();
                     this.usuarios.clear();
-                    data.forEach(u => this.usuarios.set(u.id, u));
+                    data.forEach(u => this.usuarios.set(u.id, u)); // map.set(clave, valor);
                 }
+                //transforma algo iterable(se puede recorrer) en un array
                 this.renderTabla(Array.from(this.usuarios.values()));
                 this.llenarSelectEmpresas();
             });
@@ -44,8 +47,7 @@ var usuarios;
             const select = d3.select("select#select-empresa");
             const empresasUnicas = Array.from(new Set(Array.from(this.usuarios.values()).map(u => u.id_empresa)));
             select.selectAll("option").remove();
-            select.append("option").attr("selected", true)
-                .text("Selecciona empresa");
+            select.append("option").attr("selected", true).text("Selecciona empresa");
             select.selectAll("option.empresa")
                 .data(empresasUnicas)
                 .enter()
@@ -55,8 +57,9 @@ var usuarios;
                 .text(d => `Empresa ${d}`);
         }
         filtrar(nombre, idEmpresa) {
-            const filtrados = Array.from(this.usuarios.values())
+            const filtrados = Array.from(this.usuarios.values()) //map a array 
                 .filter(u => {
+                console.log("que es u:" + u.nombre);
                 // Filtrar por nombre si se escribió algo
                 const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
                 // Filtrar por empresa si se seleccionó un id válido (>0)
@@ -66,10 +69,9 @@ var usuarios;
             this.renderTabla(filtrados);
         }
         crearControles() {
-            const contenedorInput = this._contenedor.append("div").style("display", "flex").style("gap", "10px");
-            const select = contenedorInput.append("select").attr("id", "select-empresa").style("padding", "10px 20px");
-            const inputTexto = contenedorInput.append("input").attr("type", "text")
-                .attr("placeholder", "Filtrar por nombre...").style("padding", "10px 20px");
+            const contenedorInput = this._conten.append("div").style("display", "flex").style("gap", "10px");
+            const select = contenedorInput.append("select").attr("id", "select-empresa");
+            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por nombre");
             const aplicarFiltro = () => {
                 const textoBusqueda = inputTexto.property("value") || "";
                 const valorEmpresa = Number(select.property("value") || 0);
@@ -90,17 +92,17 @@ var usuarios;
                 id: "modal-usuario",
                 ancho: 400,
                 alto: 350,
-                colorFondo: "#e6f7e9ff",
+                colorFondo: "#a5c9f1ff",
                 titulo: "Usuario",
                 modal: true,
                 onClose: () => console.log("Modal usuario cerrado"),
             });
         }
         crearTabla() {
-            const tabla = this._contenedor.append("table")
+            const tabla = this._conten.append("table")
                 .attr("id", "tabla-usuarios")
                 .style("width", "100%")
-                .style("border-collapse", "collapse")
+                .style("border-collapse", "collapse") //bordes compartidas 
                 .style("margin-top", "20px");
             const columnas = [
                 { titulo: 'Acciones', campo: null },
@@ -114,8 +116,8 @@ var usuarios;
             ];
             let columnaActiva = null;
             let direccionActiva = null;
-            const thead = tabla.append("thead");
-            const trHead = thead.append("tr");
+            const thead = tabla.append("thead"); //encabezado 
+            const trHead = thead.append("tr"); //fila 
             trHead.selectAll("th")
                 .data(columnas)
                 .enter()
@@ -123,20 +125,35 @@ var usuarios;
                 .style("border", "1px solid black")
                 .style("background-color", "#bde9c4ff")
                 .style("padding", "4px")
-                .style("user-select", "none")
-                .html(d => {
-                if (!d.campo)
-                    return d.titulo;
-                return `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span>${d.titulo}</span>
-                    <span style="display:flex; flex-direction:column; line-height:8px;">
-                        <span class="flecha-asc" style="cursor:pointer; font-size:10px; color:gray;">▲</span>
-                        <span class="flecha-desc" style="cursor:pointer; font-size:10px; color:gray;">▼</span>
-                    </span>
-                </div>
-            `;
+                .each(function (d) {
+                const th = d3.select(this);
+                if (!d.campo) {
+                    th.text(d.titulo);
+                    return;
+                }
+                const cont = th.append("div")
+                    .style("display", "flex")
+                    .style("justify-content", "space-between")
+                    .style("align-items", "center");
+                cont.append("span").text(d.titulo);
+                const flechas = cont.append("span")
+                    .style("display", "flex")
+                    .style("flex-direction", "column")
+                    .style("line-height", "8px");
+                flechas.append("span")
+                    .attr("class", "flecha-asc")
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▲");
+                flechas.append("span")
+                    .attr("class", "flecha-desc")
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▼");
             })
+                // d: datos de columna, indice arreglo de nodos 
                 .each((d, i, nodes) => {
                 if (!d.campo)
                     return;
@@ -146,7 +163,7 @@ var usuarios;
                 asc.on("click", () => {
                     const datosOrdenados = ordenarAsc(Array.from(this.usuarios.values()), d.campo);
                     this.renderTabla(datosOrdenados);
-                    columnaActiva = d.campo;
+                    columnaActiva = d.campo; //no nulo 
                     direccionActiva = 'asc';
                     actualizarFlechas();
                 });
@@ -159,7 +176,6 @@ var usuarios;
                 });
             });
             tabla.append("tbody").attr("id", "tabla-usuarios-body");
-            // 🔹 Mantener ambas flechas, pero resaltar la activa
             const actualizarFlechas = () => {
                 trHead.selectAll("th").each((d, i, nodes) => {
                     if (!d.campo)
@@ -301,10 +317,13 @@ var usuarios;
         }
     }
     usuarios.Usuarios = Usuarios;
+    // T tipo generico  
     function ordenarAsc(array, propiedad) {
         return array.sort((a, b) => {
             const valorA = a[propiedad];
             const valorB = b[propiedad];
+            console.log("propiedades a " + a[propiedad]);
+            console.log(b[propiedad]);
             if (typeof valorA === "string" && typeof valorB === "string")
                 return valorA.localeCompare(valorB);
             if (typeof valorA === "number" && typeof valorB === "number")

@@ -14,7 +14,6 @@ namespace app {
                     }
                     this._circ.abrirPantallaCirculos();
 
-                    // Cerrar las otras si están abiertas
                     if (this._user) this._user.cerrarPantallaUsuarios();
                     if (this._empre) this._empre.cerrarPantallaEpresas();
                 });
@@ -27,8 +26,7 @@ namespace app {
                         this._user = new usuarios.Usuarios();
                     }
                     this._user.abrirPantallaUsuarios();
-
-                    // Cerrar las otras si están abiertas
+                    
                     if (this._circ) this._circ.cerrarPantallaCirculos();
                     if (this._empre) this._empre.cerrarPantallaEpresas();
                 });
@@ -41,8 +39,7 @@ namespace app {
                         this._empre = new empresas.C_empresas();
                     }
                     this._empre.abrirPantallaEmpresas();
-
-                    // Cerrar las otras si están abiertas
+ 
                     if (this._circ) this._circ.cerrarPantallaCirculos();
                     if (this._user) this._user.cerrarPantallaUsuarios();
                 });
