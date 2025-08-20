@@ -20,17 +20,13 @@ namespace empresas{
             id: "VentanaEmpresas",
             ancho: 900,
             alto: 400,
-            colorFondo:"red",
+            colorFondo:"white",
             titulo: "Empresas",
             onClose() {
                 console.log("ventana empresas fue cerrada");
             },
-
         });
-
-        
     }
-    
      public abrirPantallaEmpresas(): void {
             this._ventana.mostrar();
         }
@@ -40,7 +36,4 @@ namespace empresas{
         }
 
 }
-
- 
-
 }

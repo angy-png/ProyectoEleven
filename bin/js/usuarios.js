@@ -28,6 +28,27 @@ var usuarios;
             this.crearModalUsuario();
             this.crearTabla();
             this.cargar();
+            // formato fecha/separadorT/hora/z hora en utc
+            const fecha = new Date();
+            console.log("Local:", fecha.toString());
+            console.log("UTC:", fecha.toUTCString());
+            const fechaUTC = new Date("2025-08-19T20:53:13Z"); // fecha en UTC
+            // Lista de zonas horarias mexicanas (IANA)
+            const zonas = [
+                "America/Tijuana", // UTC-8
+                "America/Hermosillo", // UTC-7
+                "America/Mazatlan", // UTC-7
+                "America/Mexico_City", // UTC-6
+                "America/Cancun" // UTC-5
+            ];
+            zonas.forEach(zona => {
+                const formato = new Intl.DateTimeFormat("es-MX", {
+                    timeZone: zona,
+                    dateStyle: "full",
+                    timeStyle: "long"
+                });
+                console.log(`Hora en ${zona}:`, formato.format(fechaUTC));
+            });
         }
         // metodo asincrono, espera la respuesta sin bloquear el programa y regresa una promesa 
         cargar() {
@@ -161,14 +182,14 @@ var usuarios;
                 const asc = th.select(".flecha-asc");
                 const desc = th.select(".flecha-desc");
                 asc.on("click", () => {
-                    const datosOrdenados = ordenarAsc(Array.from(this.usuarios.values()), d.campo);
+                    const datosOrdenados = ordenar(Array.from(this.usuarios.values()), d.campo, true);
                     this.renderTabla(datosOrdenados);
                     columnaActiva = d.campo; //no nulo 
                     direccionActiva = 'asc';
                     actualizarFlechas();
                 });
                 desc.on("click", () => {
-                    const datosOrdenados = ordenarDesc(Array.from(this.usuarios.values()), d.campo);
+                    const datosOrdenados = ordenar(Array.from(this.usuarios.values()), d.campo, false);
                     this.renderTabla(datosOrdenados);
                     columnaActiva = d.campo;
                     direccionActiva = 'desc';
@@ -264,7 +285,7 @@ var usuarios;
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
             modal.append("h3")
-                .text(modo === "agregar" ? "Agregar nuevo usuario" : "Editar usuario");
+                .text(modo === "agregar" ? "Agregar" : "Editar");
             const campos = [
                 { id: "nombre", label: "Nombre" },
                 { id: "apellidoPaterno", label: "Apellido paterno" },
@@ -318,27 +339,27 @@ var usuarios;
     }
     usuarios.Usuarios = Usuarios;
     // T tipo generico  
-    function ordenarAsc(array, propiedad) {
+    // true por defecto es ascendente 
+    function ordenar(array, propiedad, asc = true) {
         return array.sort((a, b) => {
             const valorA = a[propiedad];
             const valorB = b[propiedad];
-            console.log("propiedades a " + a[propiedad]);
-            console.log(b[propiedad]);
-            if (typeof valorA === "string" && typeof valorB === "string")
-                return valorA.localeCompare(valorB);
-            if (typeof valorA === "number" && typeof valorB === "number")
-                return valorA - valorB;
-            return 0;
-        });
-    }
-    function ordenarDesc(array, propiedad) {
-        return array.sort((a, b) => {
-            const valorA = a[propiedad];
-            const valorB = b[propiedad];
-            if (typeof valorA === "string" && typeof valorB === "string")
-                return valorB.localeCompare(valorA);
-            if (typeof valorA === "number" && typeof valorB === "number")
-                return valorB - valorA;
+            if (typeof valorA === "string" && typeof valorB === "string") {
+                if (asc) {
+                    return valorA.localeCompare(valorB); // ascendente
+                }
+                else {
+                    return valorB.localeCompare(valorA); // descendente
+                }
+            }
+            if (typeof valorA === "number" && typeof valorB === "number") {
+                if (asc) {
+                    return valorA - valorB; // ascendente
+                }
+                else {
+                    return valorB - valorA; // descendente
+                }
+            }
             return 0;
         });
     }
