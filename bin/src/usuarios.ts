@@ -68,7 +68,7 @@ namespace usuarios {
                 });
                 console.log(`Hora en ${zona}:`, formato.format(fechaUTC));
             });
-            
+
         }
         // metodo asincrono, espera la respuesta sin bloquear el programa y regresa una promesa 
         public async cargar(recargarJson: boolean = true): Promise<void> {
@@ -106,7 +106,7 @@ namespace usuarios {
 
                     console.log("que es u:" + u.nombre);
 
-                    // Filtrar por nombre si se escribió algo
+                    // Filtrar por nombre si se escribió algo, true si nombre es vacío, null, undefined, etc.  ||=o
                     const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
 
                     // Filtrar por empresa si se seleccionó un id válido (>0)
@@ -395,6 +395,7 @@ namespace usuarios {
                         this.usuarios.set(nuevoUsuario.id!, nuevoUsuario as I_Usuarios);
                     } else if (modo === "editar" && datosExistentes) {
                         this.usuarios.set(datosExistentes.id, {
+                            // actualiza datosExistentes con nuevos datos, sin perder los datos que no cambian
                             ...datosExistentes,
                             ...nuevoUsuario
                         } as I_Usuarios);
@@ -418,7 +419,7 @@ namespace usuarios {
 
     // T tipo generico  
     // true por defecto es ascendente 
-    function ordenar<T>(array: T[], propiedad: keyof T, asc: boolean = true) {
+    export function ordenar<T>(array: T[], propiedad: keyof T, asc: boolean = true) {
         return array.sort((a, b) => {
             const valorA = a[propiedad];
             const valorB = b[propiedad];

@@ -81,7 +81,7 @@ var usuarios;
             const filtrados = Array.from(this.usuarios.values()) //map a array 
                 .filter(u => {
                 console.log("que es u:" + u.nombre);
-                // Filtrar por nombre si se escribió algo
+                // Filtrar por nombre si se escribió algo, true si nombre es vacío, null, undefined, etc.  ||=o
                 const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
                 // Filtrar por empresa si se seleccionó un id válido (>0)
                 const coincideEmpresa = !idEmpresa || u.id_empresa === idEmpresa;
@@ -363,5 +363,6 @@ var usuarios;
             return 0;
         });
     }
+    usuarios.ordenar = ordenar;
 })(usuarios || (usuarios = {}));
 //# sourceMappingURL=usuarios.js.map
