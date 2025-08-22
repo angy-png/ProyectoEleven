@@ -27,14 +27,33 @@ var empresas;
             this.crearTabla();
             this.cargar();
         }
+        // public async cargar(recargarJson: boolean = true): Promise<void> {
+        //     if (recargarJson) {
+        //         const response = await fetch("./empresas.json");
+        //         const data: [] = await response.json(); 
+        //         this.empresas.clear();
+        //         // data.forEach(u => {this.empresas.set(u.id, u)}) ; 
+        //         for(let i= 0;  i< data.length; i++ ){
+        //             let _empresa[]
+        //             //ciclos de comunicacion
+        //             //usar for con para recorrer un arreglo y despues extraer lños datos para ahgreg<rlo a una rrelfo
+        //         }
+        //     }
+        //     this.renderTabla(Array.from(this.empresas.values()));
+        // }
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
                     const response = yield fetch("./empresas.json");
                     const data = yield response.json();
                     this.empresas.clear();
-                    data.forEach(u => this.empresas.set(u.id, u));
+                    // recorrer y llenar el Map
+                    for (let i = 0; i < data.length; i++) {
+                        let u = data[i];
+                        this.empresas.set(u.id, u);
+                    }
                 }
+                // convertir Map a arreglo y renderizar tabla
                 this.renderTabla(Array.from(this.empresas.values()));
             });
         }

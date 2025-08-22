@@ -6,7 +6,7 @@ namespace empresas {
         rfc: string,
         telefono: number,
         activo: boolean,
-        fechaRegistro: string
+        fechaRegistro: Date   
     }
 
     export interface I_columna {
@@ -40,19 +40,50 @@ namespace empresas {
         }
 
 
-        public async cargar(recargarJson: boolean = true): Promise<void> {
-            if (recargarJson) {
-                const response = await fetch("./empresas.json");
-                const data: I_empresas[] = await response.json();
-                this.empresas.clear();
-                data.forEach(u => this.empresas.set(u.id, u));
+        // public async cargar(recargarJson: boolean = true): Promise<void> {
+        //     if (recargarJson) {
+        //         const response = await fetch("./empresas.json");
+        //         const data: [] = await response.json(); 
+        //         this.empresas.clear();
+
+                
+        //         // data.forEach(u => {this.empresas.set(u.id, u)}) ; 
+        //         for(let i= 0;  i< data.length; i++ ){
+        //             let _empresa[]
+        //             //ciclos de comunicacion
+        //             //usar for con para recorrer un arreglo y despues extraer lños datos para ahgreg<rlo a una rrelfo
+                    
+        //         }
 
 
 
-            }
-            this.renderTabla(Array.from(this.empresas.values()));
+        //     }
+        //     this.renderTabla(Array.from(this.empresas.values()));
 
+        // }
+
+
+        
+ public async cargar(recargarJson: boolean = true): Promise<void> {
+    if (recargarJson) {
+        const response = await fetch("./empresas.json");
+        const data: I_empresas[] = await response.json(); 
+ 
+        this.empresas.clear();
+
+        // recorrer y llenar el Map
+        for (let i = 0; i < data.length; i++) {
+            let u = data[i];
+            this.empresas.set(u.id, u);
         }
+    }
+
+    // convertir Map a arreglo y renderizar tabla
+    this.renderTabla(Array.from(this.empresas.values()));
+}
+
+
+
         private renderTabla(data: I_empresas[]): void {
             const tbody = d3.select("#tabla-empresas-body");
 
@@ -97,6 +128,7 @@ namespace empresas {
                                 .style("border", "1px solid black")
                                 .style("padding", "6px")
                                 .text(d => {
+
                                     if (clave === "fechaRegistro") {
                                         // convertir UTC → zona horaria local del dispositivo
                                         const fecha = new Date(d.fechaRegistro);
