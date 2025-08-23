@@ -118,7 +118,10 @@ namespace usuarios {
         }
 
         private crearControles(): void {
-            const contenedorInput = this._conten.append("div").style("display", "flex").style("gap", "10px");
+            const contenedorInput = this._conten
+                .append("div")
+                .style("display", "flex")
+                .style("gap", "10px");
 
             const select = contenedorInput.append("select").attr("id", "select-empresa");
 

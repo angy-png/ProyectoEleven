@@ -90,7 +90,10 @@ var usuarios;
             this.renderTabla(filtrados);
         }
         crearControles() {
-            const contenedorInput = this._conten.append("div").style("display", "flex").style("gap", "10px");
+            const contenedorInput = this._conten
+                .append("div")
+                .style("display", "flex")
+                .style("gap", "10px");
             const select = contenedorInput.append("select").attr("id", "select-empresa");
             const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por nombre");
             const aplicarFiltro = () => {
