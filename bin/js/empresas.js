@@ -14,10 +14,8 @@ var empresas;
             this.empresas = new Map();
             this._ventana = new ventanaControl.ventanaControl({
                 id: "VentanaEmpresas",
-                ancho: 900,
-                alto: 400,
-                colorFondo: "white",
-                titulo: "Empresas",
+                ancho: 900, alto: 400,
+                colorFondo: "white", titulo: "Empresas",
                 onClose() {
                     console.log("ventana empresas fue cerrada");
                 },
@@ -27,33 +25,29 @@ var empresas;
             this.crearTabla();
             this.cargar();
         }
-        // public async cargar(recargarJson: boolean = true): Promise<void> {
-        //     if (recargarJson) {
-        //         const response = await fetch("./empresas.json");
-        //         const data: [] = await response.json(); 
-        //         this.empresas.clear();
-        //         // data.forEach(u => {this.empresas.set(u.id, u)}) ; 
-        //         for(let i= 0;  i< data.length; i++ ){
-        //             let _empresa[]
-        //             //ciclos de comunicacion
-        //             //usar for con para recorrer un arreglo y despues extraer lños datos para ahgreg<rlo a una rrelfo
-        //         }
-        //     }
-        //     this.renderTabla(Array.from(this.empresas.values()));
-        // }
+        //ciclos de comunicacion
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
                     const response = yield fetch("./empresas.json");
                     const data = yield response.json();
                     this.empresas.clear();
-                    // recorrer y llenar el Map
                     for (let i = 0; i < data.length; i++) {
-                        let u = data[i];
-                        this.empresas.set(u.id, u);
+                        const item = data[i];
+                        const empreNueva = {
+                            id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
+                            nombre: item.nombre ? String(item.nombre) : "",
+                            rfc: item.rfc ? String(item.rfc) : "",
+                            telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0,
+                            activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
+                            fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
+                        };
+                        this.empresas.set(empreNueva.id, empreNueva);
+                        console.log("nueva emo" + empreNueva.fechaRegistro);
                     }
+                    console.log("data" + data);
+                    console.log();
                 }
-                // convertir Map a arreglo y renderizar tabla
                 this.renderTabla(Array.from(this.empresas.values()));
             });
         }
@@ -87,22 +81,17 @@ var empresas;
                     .attr("height", 20)
                     .style("cursor", "pointer")
                     .on("click", (event, d) => this.mostrarModalConfirmacion(d));
-                columnas.forEach((clave, i) => {
+                for (let i = 0; i < columnas.length; i++) {
+                    const clave = columnas[i];
                     tr.append("td")
                         .classed(`data-col-${i}`, true)
                         .style("border", "1px solid black")
                         .style("padding", "6px")
                         .text(d => {
                         var _a;
-                        if (clave === "fechaRegistro") {
-                            // convertir UTC → zona horaria local del dispositivo
-                            const fecha = new Date(d.fechaRegistro);
-                            return fecha.toLocaleString();
-                        }
-                        // as type assertion "confia que d es de tipo I_empresas"
-                        return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
+                        return d[clave] instanceof Date ? d[clave].toLocaleString() : (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
                     });
-                });
+                }
                 return tr;
             }, update => {
                 columnas.forEach((clave, i) => {

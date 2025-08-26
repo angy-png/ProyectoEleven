@@ -6,7 +6,7 @@ namespace empresas {
         rfc: string,
         telefono: number,
         activo: boolean,
-        fechaRegistro: Date   
+        fechaRegistro: Date
     }
 
     export interface I_columna {
@@ -14,74 +14,56 @@ namespace empresas {
         campo: keyof I_empresas;
     }
 
-
     export class C_empresas {
         private empresas: Map<number, I_empresas> = new Map();
-
+        private _ventanaModal: ventanaControl.ventanaControl;
         private _ventana: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
-        private _ventanaModal: ventanaControl.ventanaControl;
+
         constructor() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "VentanaEmpresas",
-                ancho: 900,
-                alto: 400,
-                colorFondo: "white",
-                titulo: "Empresas",
+                ancho: 900, alto: 400,
+                colorFondo: "white", titulo: "Empresas",
                 onClose() {
                     console.log("ventana empresas fue cerrada");
                 },
             });
             this._conten = this._ventana._contenedor;
-
             this.crearModalUsuario();
             this.crearTabla();
             this.cargar();
         }
+        //ciclos de comunicacion
 
+        public async cargar(recargarJson: boolean = true) {
+            if (recargarJson) {
+                const response = await fetch("./empresas.json");
+                const data = await response.json();
+                this.empresas.clear();
 
-        // public async cargar(recargarJson: boolean = true): Promise<void> {
-        //     if (recargarJson) {
-        //         const response = await fetch("./empresas.json");
-        //         const data: [] = await response.json(); 
-        //         this.empresas.clear();
+                for (let i = 0; i < data.length; i++) {
+                    const item = data[i];
 
-                
-        //         // data.forEach(u => {this.empresas.set(u.id, u)}) ; 
-        //         for(let i= 0;  i< data.length; i++ ){
-        //             let _empresa[]
-        //             //ciclos de comunicacion
-        //             //usar for con para recorrer un arreglo y despues extraer lños datos para ahgreg<rlo a una rrelfo
-                    
-        //         }
+                    const empreNueva: I_empresas = {
+                        id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
+                        nombre: item.nombre ? String(item.nombre) : "",
+                        rfc: item.rfc ? String(item.rfc) : "",
+                        telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0,
+                        activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
+                        fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
+                        
+                    }
+                    this.empresas.set(empreNueva.id, empreNueva);
+                    console.log("nueva emo" +empreNueva.fechaRegistro)
+                }
 
-
-
-        //     }
-        //     this.renderTabla(Array.from(this.empresas.values()));
-
-        // }
-
-
-        
- public async cargar(recargarJson: boolean = true): Promise<void> {
-    if (recargarJson) {
-        const response = await fetch("./empresas.json");
-        const data: I_empresas[] = await response.json(); 
- 
-        this.empresas.clear();
-
-        // recorrer y llenar el Map
-        for (let i = 0; i < data.length; i++) {
-            let u = data[i];
-            this.empresas.set(u.id, u);
+                    console.log("data"+ data); 
+                    console.log()
+            }
+            this.renderTabla(Array.from(this.empresas.values()));
+         
         }
-    }
-
-    // convertir Map a arreglo y renderizar tabla
-    this.renderTabla(Array.from(this.empresas.values()));
-}
-
 
 
         private renderTabla(data: I_empresas[]): void {
@@ -122,24 +104,23 @@ namespace empresas {
                             .style("cursor", "pointer")
                             .on("click", (event, d) => this.mostrarModalConfirmacion(d));
 
-                        columnas.forEach((clave, i) => {
-                            tr.append("td")
+
+                            for (let i =0; i< columnas.length; i++){
+                                const clave = columnas[i]; 
+
+                                 tr.append("td")
                                 .classed(`data-col-${i}`, true)
                                 .style("border", "1px solid black")
                                 .style("padding", "6px")
                                 .text(d => {
 
-                                    if (clave === "fechaRegistro") {
-                                        // convertir UTC → zona horaria local del dispositivo
-                                        const fecha = new Date(d.fechaRegistro);
-                                        return fecha.toLocaleString();
-                                    }
-                                    // as type assertion "confia que d es de tipo I_empresas"
-                                    return (d as I_empresas)[clave] ?? "—";
+                                   return d[clave] instanceof Date ? d[clave].toLocaleString() : d[clave] ?? "—";
+
                                 });
-                        });
 
+                            }
 
+                        
                         return tr;
                     }, update => {
                         columnas.forEach((clave, i) => {

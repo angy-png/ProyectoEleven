@@ -16,24 +16,15 @@ namespace usuarios {
     }
 
     export class Usuarios {
-        //Map<K,V> k: tipo de clave  V:tipo de valor  = se crea un nuevo mapa vacio 
         private usuarios: Map<number, I_Usuarios> = new Map();
+        private _ventanaModal: ventanaControl.ventanaControl;
 
         private _ventana: ventanaControl.ventanaControl;
-        private _conten: d3.Selection<
-            HTMLDivElement,//GElement, tipo del elemento seleccionado (ej. HTMLDivElement)
-            unknown, //Datum, tipo de los datos asociados (unknown si no se sabe)
-            HTMLElement, //PElement, tipo del padre de ese elemento (ej. HTMLElement)
-            any>;//PDatum, tipo de los datos del padre (any si no importa)
-        private _ventanaModal: ventanaControl.ventanaControl;
+        private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 
         constructor() {
             this._ventana = new ventanaControl.ventanaControl({
-                id: "ventanaUsuarios",
-                ancho: 800,
-                alto: 400,
-                colorFondo: "white",
-                titulo: "Usuarios",
+                id: "ventanaUsuarios", ancho: 800, alto: 400, colorFondo: "white", titulo: "Usuarios",
                 onClose() {
                     console.log("La ventana de usuario fue cerrada");
                 },
@@ -43,42 +34,30 @@ namespace usuarios {
             this.crearModalUsuario();
             this.crearTabla();
             this.cargar();
-
-            // formato fecha/separadorT/hora/z hora en utc
-            const fecha = new Date();
-
-            console.log("Local:", fecha.toString());
-            console.log("UTC:", fecha.toUTCString());
-            const fechaUTC = new Date("2025-08-19T20:53:13Z"); // fecha en UTC
-
-            // Lista de zonas horarias mexicanas (IANA)
-            const zonas = [
-                "America/Tijuana",      // UTC-8
-                "America/Hermosillo",   // UTC-7
-                "America/Mazatlan",     // UTC-7
-                "America/Mexico_City",  // UTC-6
-                "America/Cancun"        // UTC-5
-            ];
-
-            zonas.forEach(zona => {
-                const formato = new Intl.DateTimeFormat("es-MX", {
-                    timeZone: zona,
-                    dateStyle: "full",
-                    timeStyle: "long"
-                });
-                console.log(`Hora en ${zona}:`, formato.format(fechaUTC));
-            });
-
         }
-        // metodo asincrono, espera la respuesta sin bloquear el programa y regresa una promesa 
-        public async cargar(recargarJson: boolean = true): Promise<void> {
+
+        public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
-                const response = await fetch("./datos.json"); //await espera el resultado de una promesa 
-                const data: I_Usuarios[] = await response.json();
+                const response = await fetch("./datos.json");
+                const data = await response.json();
                 this.usuarios.clear();
-                data.forEach(u => this.usuarios.set(u.id, u));  // map.set(clave, valor);
+
+                for (let i = 0; i < data.length; i++) {
+                    const item = data[i];
+
+                    const userNuevo: I_Usuarios = {
+                        id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
+                        nombre: item.nombre ? String(item.nombre) : "",
+                        apellidoPaterno: item.apellidoPaterno ? String(item.apellidoPaterno) : "",
+                        apellidoMaterno: item.apellidoMaterno ? String(item.apellidoMaterno) : "",
+                        usuario: item.usuario ? String(item.usuario) : "",
+                        id_empresa: item.id_empresa !== undefined && item.id_empresa !== null ? Number(item.id_empresa) : 0,
+                        correo: item.correo ? String(item.correo) : "",
+                        telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
+                    }
+                    this.usuarios.set(userNuevo.id, userNuevo);
+                }
             }
-            //transforma algo iterable(se puede recorrer) en un array
             this.renderTabla(Array.from(this.usuarios.values()));
             this.llenarSelectEmpresas();
         }
@@ -308,22 +287,22 @@ namespace usuarios {
                             .style("cursor", "pointer")
                             .on("click", (event, d) => this.mostrarModalConfirmacion(d));
 
-                        // Columnas de datos
-                        columnas.forEach((clave, i) => {
+                        for (let i = 0; i < columnas.length; i++) {
+                            const clave = columnas[i];
                             tr.append("td")
                                 .classed(`data-col-${i}`, true)
                                 .style("border", "1px solid black")
                                 .style("padding", "6px")
                                 .text(d => (d as I_Usuarios)[clave] ?? "—");
-                        });
-
+                        }
                         return tr;
                     },
                     update => {
-                        columnas.forEach((clave, i) => {
+                        for (let i = 0; i < columnas.length; i++) {
+                            const clave = columnas[i];
                             update.select(`td.data-col-${i}`)
                                 .text(d => (d as I_Usuarios)[clave] ?? "—");
-                        });
+                        }
                         return update;
                     },
                     exit => exit.remove()
@@ -368,22 +347,25 @@ namespace usuarios {
                 { id: "id_empresa", label: "Empresa" }
             ];
 
-            campos.forEach(campo => {
+            for (let i = 0; i < campos.length; i++) {
+                const campo = campos[i];
                 modal.append("p").text(campo.label);
                 modal.append("input")
                     .attr("id", campo.id)
                     .style("margin-bottom", "10px")
                     .style("display", "block")
                     .property("value", datosExistentes?.[campo.id] ?? "");
-            });
+            };
+
+
 
             modal.append("button")
                 .text("Guardar")
                 .style("margin-right", "10px")
                 .on("click", () => {
                     const nuevoUsuario: Partial<I_Usuarios> = {};
-
-                    campos.forEach(campo => {
+                    for (let i = 0; i < campos.length; i++) {
+                        const campo = campos[i];
                         const input = document.getElementById(campo.id) as HTMLInputElement;
                         let valor: any = input.value;
 
@@ -391,7 +373,8 @@ namespace usuarios {
                             valor = Number(valor);
                         }
                         nuevoUsuario[campo.id as keyof I_Usuarios] = valor as never;
-                    });
+                    };
+
 
                     if (modo === "agregar") {
                         nuevoUsuario.id = this.usuarios.size + 1;

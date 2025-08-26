@@ -4,8 +4,9 @@
     "nombre": "Tecnologías Avanzadas SA de CV",
     "rfc": "TAS010101ABC",
     "telefono": "5551234567",
-    "activo": true,
-    "fechaRegistro": "2025-08-20T16:00:00Z"
+    "activo": true,  
+    "fechaRegistro": "2025-08-20T16:00:00Z",  
+    "dia": 2
   },
   {
     "id": 2,
