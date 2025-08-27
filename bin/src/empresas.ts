@@ -20,7 +20,18 @@ namespace empresas {
         private _ventana: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 
+        private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
+
         constructor() {
+            this.pantPrincipal()
+            this.crearControles();
+            this.crearModalUsuario();
+            this.crearTabla();
+            this.cargar();
+        }
+        //ciclos de comunicacion
+
+        public pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "VentanaEmpresas",
                 ancho: 900, alto: 400,
@@ -30,11 +41,8 @@ namespace empresas {
                 },
             });
             this._conten = this._ventana._contenedor;
-            this.crearModalUsuario();
-            this.crearTabla();
-            this.cargar();
-        }
-        //ciclos de comunicacion
+        };
+
 
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
@@ -52,17 +60,31 @@ namespace empresas {
                         telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0,
                         activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
                         fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
-                        
                     }
                     this.empresas.set(empreNueva.id, empreNueva);
-                    console.log("nueva emo" +empreNueva.fechaRegistro)
+                    console.log("nueva emo" + empreNueva.fechaRegistro)
                 }
-
-                    console.log("data"+ data); 
-                    console.log()
             }
             this.renderTabla(Array.from(this.empresas.values()));
-         
+        };
+
+        private crearControles(): void {
+            const contenedorInput = this._conten
+                .append("div")
+                .style("display", "flex")
+                .style("gap", "10px");
+            const select = contenedorInput.append("select")
+                .attr("id", "select-empresa");
+
+            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por empresa");
+
+            contenedorInput.append("img")
+                .attr("src", "images/nuevo.svg")
+                .attr("width", 30)
+                .attr("height", 30)
+                .style("cursor", "pointer")
+                .style("margin-left", "auto")
+                .on("click", () => this.abrirModalUsuario("agregar"));
         }
 
 
@@ -93,7 +115,7 @@ namespace empresas {
                             .on("click", (event, d) => {
                                 const usuarioActualizado = this.empresas.get(d.id);
                                 if (usuarioActualizado) {
-
+                                    this.abrirModalUsuario("editar", usuarioActualizado);
                                 }
                             })
 
@@ -105,47 +127,44 @@ namespace empresas {
                             .on("click", (event, d) => this.mostrarModalConfirmacion(d));
 
 
-                            for (let i =0; i< columnas.length; i++){
-                                const clave = columnas[i]; 
+                        for (let i = 0; i < columnas.length; i++) {
+                            const clave = columnas[i];
 
-                                 tr.append("td")
+                            tr.append("td")
                                 .classed(`data-col-${i}`, true)
                                 .style("border", "1px solid black")
                                 .style("padding", "6px")
                                 .text(d => {
-
-                                   return d[clave] instanceof Date ? d[clave].toLocaleString() : d[clave] ?? "—";
-
+                                    const valor = d[clave];
+                                    return valor instanceof Date ? this.formatFecha(valor) : String(valor);
                                 });
+                        }
 
-                            }
 
-                        
                         return tr;
                     }, update => {
-                        columnas.forEach((clave, i) => {
+                        for (let i = 0; i < columnas.length; i++) {
+                            const clave = columnas[i];
                             update.select(`td.data-col-${i}`)
                                 .text(d => {
-                                    if (clave === "fechaRegistro") {
-                                        const fecha = new Date(d.fechaRegistro);
-                                        return fecha.toLocaleString();
-                                    }
-                                    return (d as I_empresas)[clave] ?? "—";
+                                    const valor = d[clave];
+                                    return valor instanceof Date ? this.formatFecha(valor) : String(valor);
                                 });
-                        });
 
+                        };
                         return update;
                     },
                     exit => exit.remove()
                 );
-        }
+        };
 
         private crearTabla(): void {
             const tabla = this._conten.append("table")
                 .attr("id", "tabla-empresas")
                 .style("width", "100%")
                 .style("border-collapse", "collapse")
-                .style("margin-top", "2opx");
+                .style("margin-top", "20px");
+
 
             const columnas: I_columna[] = [
                 { titulo: 'Acciones', campo: null },
@@ -153,7 +172,7 @@ namespace empresas {
                 { titulo: 'Rfc', campo: 'rfc' },
                 { titulo: 'Telefono', campo: 'telefono' },
                 { titulo: 'Activo', campo: 'activo' },
-                { titulo: 'Fecha Refistro', campo: 'fechaRegistro' }
+                { titulo: 'Fecha registro', campo: 'fechaRegistro' }
             ];
 
             let columnaActiva: keyof I_empresas | null = null;
@@ -284,6 +303,36 @@ namespace empresas {
             this._ventanaModal.mostrar();
         }
 
+        private abrirModalUsuario(modo: "agregar" | "editar", datosExistentes?: I_empresas): void {
+            this._ventanaModal.limpiarContenido();
+            const modal = this._ventanaModal._contenido;
+            modal.append("h3")
+                .text(modo === "agregar" ? "Agregar" : "Editar");
+
+            const campos = [
+                { id: "nombre", label: "Nombre" },
+                { id: "rfc", label: "Rfc" },
+                { id: "telefono", label: "Telefono" },
+                { id: "activo", label: "Activo" },
+                { id: "fechaRegistro", label: "Fecha de registro" }
+            ];
+
+            for (let i = 0; i < campos.length; i++) {
+                const campo = campos[i];
+                modal.append("p").text(campo.label);
+                modal.append("input")
+                    .attr("id", campo.id)
+                    .style("margin-bottom", "10px")
+                    .style("display", "block")
+                    .property("value", datosExistentes?.[campo.id] ?? "");
+            };
+            modal.append("button")
+                .text("Guardar")
+                .style("margin-right", "10px")
+
+            this._ventanaModal.mostrar();
+        }
+
 
         public abrirPantallaEmpresas(): void {
             this._ventana.mostrar();
@@ -292,6 +341,5 @@ namespace empresas {
         public cerrarPantallaEpresas(): void {
             this._ventana.ocultar();
         }
-
     }
 }

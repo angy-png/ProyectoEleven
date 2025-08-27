@@ -18,11 +18,17 @@ namespace usuarios {
     export class Usuarios {
         private usuarios: Map<number, I_Usuarios> = new Map();
         private _ventanaModal: ventanaControl.ventanaControl;
-
         private _ventana: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 
         constructor() {
+            this.pantPrincipal(); 
+            this.crearControles();
+            this.crearModalUsuario();
+            this.crearTabla();
+            this.cargar();
+        }
+        public pantPrincipal(){
             this._ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios", ancho: 800, alto: 400, colorFondo: "white", titulo: "Usuarios",
                 onClose() {
@@ -30,11 +36,7 @@ namespace usuarios {
                 },
             });
             this._conten = this._ventana._contenedor;
-            this.crearControles();
-            this.crearModalUsuario();
-            this.crearTabla();
-            this.cargar();
-        }
+        };
 
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
@@ -60,7 +62,7 @@ namespace usuarios {
             }
             this.renderTabla(Array.from(this.usuarios.values()));
             this.llenarSelectEmpresas();
-        }
+        };
 
         private llenarSelectEmpresas(): void {
             const select = d3.select("select#select-empresa");
@@ -302,7 +304,7 @@ namespace usuarios {
                             const clave = columnas[i];
                             update.select(`td.data-col-${i}`)
                                 .text(d => (d as I_Usuarios)[clave] ?? "—");
-                        }
+                        };
                         return update;
                     },
                     exit => exit.remove()

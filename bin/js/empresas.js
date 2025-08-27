@@ -12,6 +12,15 @@ var empresas;
     class C_empresas {
         constructor() {
             this.empresas = new Map();
+            this.formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
+            this.pantPrincipal();
+            this.crearControles();
+            this.crearModalUsuario();
+            this.crearTabla();
+            this.cargar();
+        }
+        //ciclos de comunicacion
+        pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "VentanaEmpresas",
                 ancho: 900, alto: 400,
@@ -21,11 +30,8 @@ var empresas;
                 },
             });
             this._conten = this._ventana._contenedor;
-            this.crearModalUsuario();
-            this.crearTabla();
-            this.cargar();
         }
-        //ciclos de comunicacion
+        ;
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
@@ -45,11 +51,26 @@ var empresas;
                         this.empresas.set(empreNueva.id, empreNueva);
                         console.log("nueva emo" + empreNueva.fechaRegistro);
                     }
-                    console.log("data" + data);
-                    console.log();
                 }
                 this.renderTabla(Array.from(this.empresas.values()));
             });
+        }
+        ;
+        crearControles() {
+            const contenedorInput = this._conten
+                .append("div")
+                .style("display", "flex")
+                .style("gap", "10px");
+            const select = contenedorInput.append("select")
+                .attr("id", "select-empresa");
+            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por empresa");
+            contenedorInput.append("img")
+                .attr("src", "images/nuevo.svg")
+                .attr("width", 30)
+                .attr("height", 30)
+                .style("cursor", "pointer")
+                .style("margin-left", "auto")
+                .on("click", () => this.abrirModalUsuario("agregar"));
         }
         renderTabla(data) {
             const tbody = d3.select("#tabla-empresas-body");
@@ -73,6 +94,7 @@ var empresas;
                     .on("click", (event, d) => {
                     const usuarioActualizado = this.empresas.get(d.id);
                     if (usuarioActualizado) {
+                        this.abrirModalUsuario("editar", usuarioActualizado);
                     }
                 });
                 acciones.append("img")
@@ -88,39 +110,38 @@ var empresas;
                         .style("border", "1px solid black")
                         .style("padding", "6px")
                         .text(d => {
-                        var _a;
-                        return d[clave] instanceof Date ? d[clave].toLocaleString() : (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
+                        const valor = d[clave];
+                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
                     });
                 }
                 return tr;
             }, update => {
-                columnas.forEach((clave, i) => {
+                for (let i = 0; i < columnas.length; i++) {
+                    const clave = columnas[i];
                     update.select(`td.data-col-${i}`)
                         .text(d => {
-                        var _a;
-                        if (clave === "fechaRegistro") {
-                            const fecha = new Date(d.fechaRegistro);
-                            return fecha.toLocaleString();
-                        }
-                        return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
+                        const valor = d[clave];
+                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
                     });
-                });
+                }
+                ;
                 return update;
             }, exit => exit.remove());
         }
+        ;
         crearTabla() {
             const tabla = this._conten.append("table")
                 .attr("id", "tabla-empresas")
                 .style("width", "100%")
                 .style("border-collapse", "collapse")
-                .style("margin-top", "2opx");
+                .style("margin-top", "20px");
             const columnas = [
                 { titulo: 'Acciones', campo: null },
                 { titulo: 'Nombre', campo: 'nombre' },
                 { titulo: 'Rfc', campo: 'rfc' },
                 { titulo: 'Telefono', campo: 'telefono' },
                 { titulo: 'Activo', campo: 'activo' },
-                { titulo: 'Fecha Refistro', campo: 'fechaRegistro' }
+                { titulo: 'Fecha registro', campo: 'fechaRegistro' }
             ];
             let columnaActiva = null;
             let direccionActiva = null;
@@ -228,6 +249,34 @@ var empresas;
                 this.cargar(false);
                 this._ventanaModal.ocultar();
             });
+            this._ventanaModal.mostrar();
+        }
+        abrirModalUsuario(modo, datosExistentes) {
+            var _a;
+            this._ventanaModal.limpiarContenido();
+            const modal = this._ventanaModal._contenido;
+            modal.append("h3")
+                .text(modo === "agregar" ? "Agregar" : "Editar");
+            const campos = [
+                { id: "nombre", label: "Nombre" },
+                { id: "rfc", label: "Rfc" },
+                { id: "telefono", label: "Telefono" },
+                { id: "activo", label: "Activo" },
+                { id: "fechaRegistro", label: "Fecha de registro" }
+            ];
+            for (let i = 0; i < campos.length; i++) {
+                const campo = campos[i];
+                modal.append("p").text(campo.label);
+                modal.append("input")
+                    .attr("id", campo.id)
+                    .style("margin-bottom", "10px")
+                    .style("display", "block")
+                    .property("value", (_a = datosExistentes === null || datosExistentes === void 0 ? void 0 : datosExistentes[campo.id]) !== null && _a !== void 0 ? _a : "");
+            }
+            ;
+            modal.append("button")
+                .text("Guardar")
+                .style("margin-right", "10px");
             this._ventanaModal.mostrar();
         }
         abrirPantallaEmpresas() {

@@ -12,6 +12,13 @@ var usuarios;
     class Usuarios {
         constructor() {
             this.usuarios = new Map();
+            this.pantPrincipal();
+            this.crearControles();
+            this.crearModalUsuario();
+            this.crearTabla();
+            this.cargar();
+        }
+        pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios", ancho: 800, alto: 400, colorFondo: "white", titulo: "Usuarios",
                 onClose() {
@@ -19,11 +26,8 @@ var usuarios;
                 },
             });
             this._conten = this._ventana._contenedor;
-            this.crearControles();
-            this.crearModalUsuario();
-            this.crearTabla();
-            this.cargar();
         }
+        ;
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
@@ -49,6 +53,7 @@ var usuarios;
                 this.llenarSelectEmpresas();
             });
         }
+        ;
         llenarSelectEmpresas() {
             const select = d3.select("select#select-empresa");
             const empresasUnicas = Array.from(new Set(Array.from(this.usuarios.values()).map(u => u.id_empresa)));
@@ -250,6 +255,7 @@ var usuarios;
                     update.select(`td.data-col-${i}`)
                         .text(d => { var _a; return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—"; });
                 }
+                ;
                 return update;
             }, exit => exit.remove());
         }
