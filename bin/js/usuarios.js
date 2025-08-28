@@ -359,6 +359,22 @@ var usuarios;
                     return valorB - valorA; // descendente
                 }
             }
+            if (typeof valorA === "boolean" && typeof valorB === "boolean") {
+                if (asc) {
+                    return Number(valorA) - Number(valorB);
+                }
+                else {
+                    return Number(valorB) - Number(valorA);
+                }
+            }
+            if (valorA instanceof Date && valorB instanceof Date) {
+                if (asc) {
+                    return valorA.getTime() - valorB.getTime();
+                }
+                else {
+                    return valorB.getTime() - valorA.getTime();
+                }
+            }
             return 0;
         });
     }

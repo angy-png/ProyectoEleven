@@ -21,6 +21,8 @@ namespace empresas {
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 
         private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
+        private formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
+
 
         constructor() {
             this.pantPrincipal()
@@ -62,7 +64,7 @@ namespace empresas {
                         fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
                     }
                     this.empresas.set(empreNueva.id, empreNueva);
-                    console.log("nueva emo" + empreNueva.fechaRegistro)
+                    console.log("nueva emp" + empreNueva.fechaRegistro)
                 }
             }
             this.renderTabla(Array.from(this.empresas.values()));
@@ -136,6 +138,9 @@ namespace empresas {
                                 .style("padding", "6px")
                                 .text(d => {
                                     const valor = d[clave];
+                                    if (clave === 'activo') {
+                                        return valor ? "Si" : "No";
+                                    }
                                     return valor instanceof Date ? this.formatFecha(valor) : String(valor);
                                 });
                         }
@@ -148,6 +153,10 @@ namespace empresas {
                             update.select(`td.data-col-${i}`)
                                 .text(d => {
                                     const valor = d[clave];
+
+                                    if (clave === 'activo') {
+                                        return valor ? "Si" : "No";
+                                    }
                                     return valor instanceof Date ? this.formatFecha(valor) : String(valor);
                                 });
 
@@ -320,15 +329,86 @@ namespace empresas {
             for (let i = 0; i < campos.length; i++) {
                 const campo = campos[i];
                 modal.append("p").text(campo.label);
-                modal.append("input")
-                    .attr("id", campo.id)
-                    .style("margin-bottom", "10px")
-                    .style("display", "block")
-                    .property("value", datosExistentes?.[campo.id] ?? "");
-            };
+
+                if (campo.id === "activo") {
+                    const select = modal.append("select")
+                        .attr("id", campo.id)
+                        .style("margin-bottom", "10px")
+                        .style("display", "block");
+
+                    select.append("option")
+                        .attr("value", "true")
+                        .text("Sí");
+
+                    select.append("option")
+                        .attr("value", "false")
+                        .text("No");
+                    if (datosExistentes) {
+                        if (datosExistentes.activo) {
+                            select.property("value", "true");
+                        } else {
+                            select.property("value", "false");
+                        }
+                    }
+                } else if (campo.id === "fechaRegistro") {
+                    const fechaInput = modal.append("input")
+                        .attr("id", campo.id)
+                        .attr("type", "datetime-local")
+                        .style("margin-bottom", "10px")
+                        .style("display", "block");
+
+                    if (datosExistentes) {
+                        const fechaLocal = datosExistentes.fechaRegistro; // Date ya en JS
+                        const fechaStr = this.formatInputFecha(fechaLocal);    // Usando d3 para formatear
+                        fechaInput.property("value", fechaStr);
+                    }
+                }
+                else {
+                    modal.append("input")
+                        .attr("id", campo.id)
+                        .style("margin-bottom", "10px")
+                        .style("display", "block")
+                        .property("value", datosExistentes?.[campo.id] ?? "");
+                }
+            };  
             modal.append("button")
                 .text("Guardar")
                 .style("margin-right", "10px")
+                .on("click", () => {
+                    const nuevaEmpresa: Partial<I_empresas> = {};
+                    for (let i = 0; i < campos.length; i++) {
+                        const campo = campos[i];
+                        const input = document.getElementById(campo.id) as HTMLInputElement;
+                        let valor: any = input.value;
+
+                        if (campo.id === "telefono") {
+                            valor = Number(valor);
+                        }
+
+                        else if (campo.id === "activo") {
+                            valor = valor.toLowerCase() === "true";
+                        }
+
+                        if (campo.id === "fechaRegistro") {
+                            const inputFecha = document.getElementById(campo.id) as HTMLInputElement;
+                            valor = new Date(inputFecha.value); // hora local
+
+                        }
+                        nuevaEmpresa[campo.id as keyof I_empresas] = valor as never;
+                    };
+                    if (modo === "agregar") {
+                        nuevaEmpresa.id = this.empresas.size + 1;
+                        this.empresas.set(nuevaEmpresa.id!, nuevaEmpresa as I_empresas);
+                    } else if (modo === "editar" && datosExistentes) {
+                        this.empresas.set(datosExistentes.id, {
+                            ...datosExistentes,
+                            ...nuevaEmpresa
+                        } as I_empresas);
+
+                    }
+                    this.cargar(false);
+                    this._ventanaModal.ocultar();
+                });
 
             this._ventanaModal.mostrar();
         }
