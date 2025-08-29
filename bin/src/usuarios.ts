@@ -110,8 +110,8 @@ namespace usuarios {
 
             const aplicarFiltro = () => {
                 const textoBusqueda = inputTexto.property("value") || "";
-                const valorEmpresa = Number(select.property("value") || 0);
-                this.filtrar(textoBusqueda, valorEmpresa);
+                const valorusuario = Number(select.property("value") || 0);
+                this.filtrar(textoBusqueda, valorusuario);
             };
 
             select.on("change", aplicarFiltro);

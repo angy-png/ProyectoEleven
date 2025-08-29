@@ -50,21 +50,31 @@ var empresas;
                             fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
                         };
                         this.empresas.set(empreNueva.id, empreNueva);
-                        console.log("nueva emp" + empreNueva.fechaRegistro);
                     }
                 }
                 this.renderTabla(Array.from(this.empresas.values()));
             });
         }
         ;
+        filtrar(nombre) {
+            const filtrados = Array.from(this.empresas.values())
+                .filter(u => {
+                const coindiceNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
+                return coindiceNombre;
+            });
+            this.renderTabla(filtrados);
+        }
         crearControles() {
             const contenedorInput = this._conten
                 .append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
-            const select = contenedorInput.append("select")
-                .attr("id", "select-empresa");
             const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por empresa");
+            const aplicarFiltro = () => {
+                const textoBusqueda = inputTexto.property("value") || "";
+                this.filtrar(textoBusqueda);
+            };
+            inputTexto.on("input", aplicarFiltro);
             contenedorInput.append("img")
                 .attr("src", "images/nuevo.svg")
                 .attr("width", 30)

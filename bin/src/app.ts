@@ -11,7 +11,7 @@ namespace app {
                 .on("click", () => {
                     if (!this._circ) {
                         this._circ = new circulos.SvgCirculo();
-                    }
+                   }
                     this._circ.abrirPantallaCirculos();
 
                     if (this._user) this._user.cerrarPantallaUsuarios();

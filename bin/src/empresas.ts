@@ -16,6 +16,7 @@ namespace empresas {
 
     export class C_empresas {
         private empresas: Map<number, I_empresas> = new Map();
+        // private contadorPalabras = new Map<number, I_empresas>();s
         private _ventanaModal: ventanaControl.ventanaControl;
         private _ventana: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
@@ -45,7 +46,6 @@ namespace empresas {
             this._conten = this._ventana._contenedor;
         };
 
-
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
                 const response = await fetch("./empresas.json");
@@ -63,22 +63,34 @@ namespace empresas {
                         activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
                         fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
                     }
-                    this.empresas.set(empreNueva.id, empreNueva);
-                    console.log("nueva emp" + empreNueva.fechaRegistro)
+                    this.empresas.set(empreNueva.id, empreNueva); 
                 }
             }
             this.renderTabla(Array.from(this.empresas.values()));
         };
+
+        private filtrar(nombre: string) {
+            const filtrados = Array.from(this.empresas.values())
+                .filter(u => {
+                    const coindiceNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
+                    return coindiceNombre;
+                });
+                this.renderTabla(filtrados); 
+        }
 
         private crearControles(): void {
             const contenedorInput = this._conten
                 .append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
-            const select = contenedorInput.append("select")
-                .attr("id", "select-empresa");
+           
 
             const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por empresa");
+            const aplicarFiltro = () => {
+                const textoBusqueda = inputTexto.property("value") || "";
+                this.filtrar(textoBusqueda)
+            }
+            inputTexto.on("input", aplicarFiltro);
 
             contenedorInput.append("img")
                 .attr("src", "images/nuevo.svg")
@@ -88,7 +100,6 @@ namespace empresas {
                 .style("margin-left", "auto")
                 .on("click", () => this.abrirModalUsuario("agregar"));
         }
-
 
         private renderTabla(data: I_empresas[]): void {
             const tbody = d3.select("#tabla-empresas-body");
@@ -370,7 +381,7 @@ namespace empresas {
                         .style("display", "block")
                         .property("value", datosExistentes?.[campo.id] ?? "");
                 }
-            };  
+            };
             modal.append("button")
                 .text("Guardar")
                 .style("margin-right", "10px")
