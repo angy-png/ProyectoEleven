@@ -10,7 +10,7 @@ var app;
                 .text("Circulos")
                 .on("click", () => {
                 if (!this._circ) {
-                    this._circ = new circulos.SvgCirculo();
+                    this._circ = new circulos.ControladorCirculos();
                 }
                 this._circ.abrirPantallaCirculos();
                 if (this._user)
@@ -23,13 +23,13 @@ var app;
                 .text("Usuarios")
                 .on("click", () => {
                 if (!this._user) {
-                    this._user = new usuarios.Usuarios();
+                    this._user = new usuarios.ControladorUsuarios();
                 }
-                this._user.abrirPantallaUsuarios();
-                if (this._circ)
-                    this._circ.cerrarPantallaCirculos();
+                this._user.abrirPantallaUusuarios();
                 if (this._empre)
                     this._empre.cerrarPantallaEpresas();
+                if (this._circ)
+                    this._circ.cerrarPantallaCirculos();
             });
             d3.select("body")
                 .append("button")
@@ -39,10 +39,10 @@ var app;
                     this._empre = new empresas.C_empresas();
                 }
                 this._empre.abrirPantallaEmpresas();
-                if (this._circ)
-                    this._circ.cerrarPantallaCirculos();
                 if (this._user)
                     this._user.cerrarPantallaUsuarios();
+                if (this._circ)
+                    this._circ.cerrarPantallaCirculos();
             });
             d3.selectAll("button")
                 .style("background", "#d9fab2ff")

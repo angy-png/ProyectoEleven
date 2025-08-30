@@ -20,7 +20,11 @@ var usuarios;
         }
         pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
-                id: "ventanaUsuarios", ancho: 800, alto: 400, colorFondo: "white", titulo: "Usuarios",
+                id: "ventanaUsuarios",
+                ancho: 800,
+                alto: 400,
+                colorFondo: "white",
+                titulo: "Usuarios",
                 onClose() {
                     console.log("La ventana de usuario fue cerrada");
                 },
