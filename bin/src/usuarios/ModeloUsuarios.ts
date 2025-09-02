@@ -17,17 +17,19 @@ namespace usuarios {
 
     export class ModeloUsuarios {
         private usuarios: Map<number, I_Usuarios> = new Map();
-        private contaUser: number = 0;
 
-
-        public getAllUser(): I_Usuarios[] {
+        public obtenerTodos(): I_Usuarios[] {
             return Array.from(this.usuarios.values());
         }
 
+        public obtener(id: number): I_Usuarios | undefined {
+            return this.usuarios.get(id);
+        }
 
-        public async cargar(recargarJson: boolean = true) {
+        public async cargarUser(recargarJson: boolean = true) {
             if (recargarJson) {
-                const response = await fetch("../datos.json");
+                const response = await fetch("../bin/datos.json");
+
                 const data = await response.json();
                 this.usuarios.clear();
 
@@ -46,22 +48,39 @@ namespace usuarios {
 
                     }
                     this.usuarios.set(userNuevo.id, userNuevo);
-                    return userNuevo;
+
+                    console.log(userNuevo);
                 }
 
 
             }
         }
 
+        public eliminar(id: number): void {
+            this.usuarios.delete(id);
+        }
 
+        public agregar(usuario: I_Usuarios): void {
+            console.log(usuario);
+            usuario.id = this.usuarios.size + 1; // asignar id incremental
+            this.usuarios.set(usuario.id, usuario);
+        }
 
+        public editar(id: number, usuarioActualizado: Partial<I_Usuarios>): void {
+            const existente = this.usuarios.get(id);
+            if (existente) {
+                this.usuarios.set(id, { ...existente, ...usuarioActualizado });
+                console.log(usuarioActualizado);
+            }
+        }
 
+        public obtenerEmpresas(): number[] {
+            return Array.from(
+                new Set(Array.from(this.usuarios.values()).map(u => u.id_empresa))
+            );
+        }
 
-
-
-
-
-
+ 
 
     }
 }

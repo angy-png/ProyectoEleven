@@ -12,15 +12,17 @@ var usuarios;
     class ModeloUsuarios {
         constructor() {
             this.usuarios = new Map();
-            this.contaUser = 0;
         }
-        getAllUser() {
+        obtenerTodos() {
             return Array.from(this.usuarios.values());
         }
-        cargar() {
+        obtener(id) {
+            return this.usuarios.get(id);
+        }
+        cargarUser() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
-                    const response = yield fetch("../datos.json");
+                    const response = yield fetch("../bin/datos.json");
                     const data = yield response.json();
                     this.usuarios.clear();
                     for (let i = 0; i < data.length; i++) {
@@ -36,10 +38,28 @@ var usuarios;
                             telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
                         };
                         this.usuarios.set(userNuevo.id, userNuevo);
-                        return userNuevo;
+                        console.log(userNuevo);
                     }
                 }
             });
+        }
+        eliminar(id) {
+            this.usuarios.delete(id);
+        }
+        agregar(usuario) {
+            console.log(usuario);
+            usuario.id = this.usuarios.size + 1; // asignar id incremental
+            this.usuarios.set(usuario.id, usuario);
+        }
+        editar(id, usuarioActualizado) {
+            const existente = this.usuarios.get(id);
+            if (existente) {
+                this.usuarios.set(id, Object.assign(Object.assign({}, existente), usuarioActualizado));
+                console.log(usuarioActualizado);
+            }
+        }
+        obtenerEmpresas() {
+            return Array.from(new Set(Array.from(this.usuarios.values()).map(u => u.id_empresa)));
         }
     }
     usuarios.ModeloUsuarios = ModeloUsuarios;
