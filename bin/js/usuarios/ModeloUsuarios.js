@@ -61,6 +61,10 @@ var usuarios;
         obtenerEmpresas() {
             return Array.from(new Set(Array.from(this.usuarios.values()).map(u => u.id_empresa)));
         }
+        ordenarUsuarios(propiedad, asc = true) {
+            const todos = this.obtenerTodos();
+            return usuarios.ordenar(todos, propiedad, asc);
+        }
     }
     usuarios.ModeloUsuarios = ModeloUsuarios;
 })(usuarios || (usuarios = {}));

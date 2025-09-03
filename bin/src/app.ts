@@ -2,7 +2,7 @@ namespace app {
     export class main {
         _circ: circulos.ControladorCirculos | null = null;
         _user: usuarios.ControladorUsuarios | null = null;
-        _empre: empresas.C_empresas | null = null;
+        _empre: empresas.ControladorEmpresa | null = null;
 
         constructor() {
             d3.select("body")
@@ -15,7 +15,7 @@ namespace app {
                     this._circ.abrirPantallaCirculos();
                     
                     if (this._user) this._user.cerrarPantallaUsuarios();
-                    if (this._empre) this._empre.cerrarPantallaEpresas();
+                    if (this._empre) this._empre.cerrarPantallaEmpresa();
                 });
 
             d3.select("body")
@@ -27,7 +27,7 @@ namespace app {
                     }
                     this._user.abrirPantallaUusuarios();
 
-                    if (this._empre) this._empre.cerrarPantallaEpresas();
+                    if (this._empre) this._empre.cerrarPantallaEmpresa();
                     if (this._circ) this._circ.cerrarPantallaCirculos();
                 });
 
@@ -36,9 +36,9 @@ namespace app {
                 .text("Empresas")
                 .on("click", () => {
                     if (!this._empre) {
-                        this._empre = new empresas.C_empresas();
+                        this._empre = new empresas.ControladorEmpresa();
                     }
-                    this._empre.abrirPantallaEmpresas();
+                    this._empre.abrirPantallaEmpresa();
 
                     if (this._user) this._user.cerrarPantallaUsuarios();
                     if (this._circ) this._circ.cerrarPantallaCirculos();

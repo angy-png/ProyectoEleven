@@ -4,6 +4,15 @@ var usuarios;
         constructor(ventana) {
             this.ventana = ventana;
         }
+        onGuardar(callback) {
+            this.onGuardarCallback = callback;
+        }
+        onEliminar(callback) {
+            this.onEliminarCallback = callback;
+        }
+        onFiltro(callback) {
+            this.onFiltroCallback = callback;
+        }
         crearModalUsuario() {
             this.ventana = new ventanaControl.ventanaControl({
                 id: "modal-usuario",
@@ -100,11 +109,15 @@ var usuarios;
                 const asc = th.select(".flecha-asc");
                 const desc = th.select(".flecha-desc");
                 asc.on("click", () => {
+                    var _a;
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, true);
                     columnaActiva = d.campo; //no nulo 
                     direccionActiva = 'asc';
                     actualizarFlechas();
                 });
                 desc.on("click", () => {
+                    var _a;
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, false);
                     columnaActiva = d.campo;
                     direccionActiva = 'desc';
                     actualizarFlechas();
@@ -128,30 +141,6 @@ var usuarios;
                     }
                 });
             };
-        }
-        onEliminar(callback) {
-            this.onEliminarCallback = callback;
-        }
-        onGuardar(callback) {
-            this.onGuardarCallback = callback;
-        }
-        onFiltro(callback) {
-            this.onFiltroCallback = callback;
-        }
-        mostrarModalEliminar(nombreUsuario, onConfirm) {
-            this.ventana.limpiarContenido();
-            const modal = this.ventana._contenido;
-            modal.append("h2").text("Confirmar eliminación");
-            modal.append("p").text(`¿Estás seguro de que deseas eliminar a ${nombreUsuario}?`)
-                .style("margin-bottom", "20px");
-            const botones = modal.append("div").style("display", "flex").style("gap", "10px");
-            botones.append("button")
-                .text("Sí, eliminar")
-                .on("click", () => {
-                onConfirm(); // Aquí se llama al controlador
-                this.ventana.ocultar();
-            });
-            this.ventana.mostrar();
         }
         abrirModalUsuario(modo, datosExistentes) {
             var _a;
@@ -195,6 +184,21 @@ var usuarios;
                 console.log(modo);
                 console.log(datosExistentes);
                 console.log(usuario);
+                this.ventana.ocultar();
+            });
+            this.ventana.mostrar();
+        }
+        mostrarModalEliminar(nombreUsuario, onConfirm) {
+            this.ventana.limpiarContenido();
+            const modal = this.ventana._contenido;
+            modal.append("h2").text("Confirmar eliminación");
+            modal.append("p").text(`¿Estás seguro de que deseas eliminar a ${nombreUsuario}?`)
+                .style("margin-bottom", "20px");
+            const botones = modal.append("div").style("display", "flex").style("gap", "10px");
+            botones.append("button")
+                .text("Sí, eliminar")
+                .on("click", () => {
+                onConfirm(); // Aquí se llama al controlador
                 this.ventana.ocultar();
             });
             this.ventana.mostrar();

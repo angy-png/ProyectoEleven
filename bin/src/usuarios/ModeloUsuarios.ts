@@ -80,7 +80,12 @@ namespace usuarios {
             );
         }
 
+        public ordenarUsuarios(propiedad: keyof I_Usuarios, asc: boolean = true): I_Usuarios[] {
+    const todos = this.obtenerTodos();
+    return ordenar(todos, propiedad, asc);
+}
+
+
  
 
-    }
-}
+}}

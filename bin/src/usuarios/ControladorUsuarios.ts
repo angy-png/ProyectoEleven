@@ -5,8 +5,6 @@ namespace usuarios {
         private vista: VistaUsuarios;
         private ventana: ventanaControl.ventanaControl;
 
-        private columnaActiva: keyof I_Usuarios = 'nombre';
-private direccionActiva: 'asc' | 'desc' = 'asc';
         constructor() {
             this.ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios",
@@ -29,6 +27,17 @@ private direccionActiva: 'asc' | 'desc' = 'asc';
             this.vista.onFiltro((nombre, idEmpresa) => {
                 this.filtrar(nombre, idEmpresa);
             });
+
+               this.vista.onOrdenar = (campo, asc) => {
+                const ordenados = this.modelo.ordenarUsuarios(campo, asc);
+                this.vista.renderizarUser(ordenados);
+            };
+        
+
+
+
+
+
         }
 
         public abrirPantallaUusuarios(): void {
@@ -87,8 +96,8 @@ private direccionActiva: 'asc' | 'desc' = 'asc';
                 });
             this.vista.renderizarUser(filtrados);
         }
- 
- 
+
+
 
     }
 }

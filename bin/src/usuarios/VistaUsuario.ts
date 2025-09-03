@@ -3,11 +3,23 @@ namespace usuarios {
         private onEliminarCallback?: (usuario: I_Usuarios) => void;
         private onGuardarCallback?: (modo: "agregar" | "editar", datos: I_Usuarios | Partial<I_Usuarios>) => void;
         private onFiltroCallback?: (nombre: string, idEmpresa: number) => void;
+        public onOrdenar?: (campo: keyof I_Usuarios, asc: boolean) => void;
 
 
         constructor(
             private ventana: ventanaControl.ventanaControl
         ) {
+        }
+        public onGuardar(callback: (modo: "agregar" | "editar", datos: I_Usuarios | Partial<I_Usuarios>) => void) {
+            this.onGuardarCallback = callback;
+        }
+
+        public onEliminar(callback: (usuario: I_Usuarios) => void) {
+            this.onEliminarCallback = callback;
+        }
+
+        public onFiltro(callback: (nombre: string, idEmpresa: number) => void) {
+            this.onFiltroCallback = callback;
         }
 
         public crearModalUsuario(): void {
@@ -36,7 +48,7 @@ namespace usuarios {
                 const valorusuario = Number(select.property("value") || 0);
                 this.onFiltroCallback(textoBusqueda, valorusuario);
             };
-            
+
             select.on("change", aplicarFiltro);
             inputTexto.on("input", aplicarFiltro);
 
@@ -124,7 +136,8 @@ namespace usuarios {
                     const asc = th.select(".flecha-asc");
                     const desc = th.select(".flecha-desc");
 
-                     asc.on("click", () => { 
+                    asc.on("click", () => {
+                        this.onOrdenar?.(d.campo!, true);
                         columnaActiva = d.campo!; //no nulo 
                         direccionActiva = 'asc';
                         actualizarFlechas();
@@ -132,6 +145,7 @@ namespace usuarios {
 
 
                     desc.on("click", () => {
+                        this.onOrdenar?.(d.campo!, false);
                         columnaActiva = d.campo!;
                         direccionActiva = 'desc';
                         actualizarFlechas();
@@ -140,7 +154,7 @@ namespace usuarios {
 
             tabla.append("tbody").attr("id", "tabla-usuarios-body");
 
-             const actualizarFlechas = () => {
+            const actualizarFlechas = () => {
                 trHead.selectAll("th").each((d: I_columna, i, nodes) => {
                     if (!d.campo) return;
 
@@ -157,37 +171,6 @@ namespace usuarios {
                     }
                 });
             };
-        }
-       
-        public onEliminar(callback: (usuario: I_Usuarios) => void) {
-            this.onEliminarCallback = callback;
-        }
-
-        public onGuardar(callback: (modo: "agregar" | "editar", datos: I_Usuarios | Partial<I_Usuarios>) => void) {
-            this.onGuardarCallback = callback;
-        }
-
-        public onFiltro(callback: (nombre: string, idEmpresa: number) => void) {
-            this.onFiltroCallback = callback;
-        }
-
-        public mostrarModalEliminar(nombreUsuario: string, onConfirm: () => void) {
-            this.ventana.limpiarContenido();
-            const modal = this.ventana._contenido;
-
-            modal.append("h2").text("Confirmar eliminación");
-            modal.append("p").text(`¿Estás seguro de que deseas eliminar a ${nombreUsuario}?`)
-                .style("margin-bottom", "20px");
-
-            const botones = modal.append("div").style("display", "flex").style("gap", "10px");
-            botones.append("button")
-                .text("Sí, eliminar")
-                .on("click", () => {
-                    onConfirm(); // Aquí se llama al controlador
-                    this.ventana.ocultar();
-                });
-
-            this.ventana.mostrar();
         }
 
         private abrirModalUsuario(modo: "agregar" | "editar", datosExistentes?: I_Usuarios): void {
@@ -241,6 +224,24 @@ namespace usuarios {
 
             this.ventana.mostrar();
         }
+        public mostrarModalEliminar(nombreUsuario: string, onConfirm: () => void) {
+            this.ventana.limpiarContenido();
+            const modal = this.ventana._contenido;
+
+            modal.append("h2").text("Confirmar eliminación");
+            modal.append("p").text(`¿Estás seguro de que deseas eliminar a ${nombreUsuario}?`)
+                .style("margin-bottom", "20px");
+
+            const botones = modal.append("div").style("display", "flex").style("gap", "10px");
+            botones.append("button")
+                .text("Sí, eliminar")
+                .on("click", () => {
+                    onConfirm(); // Aquí se llama al controlador
+                    this.ventana.ocultar();
+                });
+
+            this.ventana.mostrar();
+        }
 
         public renderizarUser(data: I_Usuarios[]): void {
             const tbody = d3.select("#tabla-usuarios-body");
@@ -268,7 +269,6 @@ namespace usuarios {
                             .on("click", (event, d) => {
                                 this.abrirModalUsuario("editar", d);
                             });
-
 
                         acciones.append("img")
                             .attr("src", "images/eliminar.svg")
@@ -318,8 +318,5 @@ namespace usuarios {
                 .attr("value", d => String(d))
                 .text(d => `Empresa ${d}`);
         }
-
-        
-
     }
 }

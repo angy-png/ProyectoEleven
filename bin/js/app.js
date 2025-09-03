@@ -16,7 +16,7 @@ var app;
                 if (this._user)
                     this._user.cerrarPantallaUsuarios();
                 if (this._empre)
-                    this._empre.cerrarPantallaEpresas();
+                    this._empre.cerrarPantallaEmpresa();
             });
             d3.select("body")
                 .append("button")
@@ -27,7 +27,7 @@ var app;
                 }
                 this._user.abrirPantallaUusuarios();
                 if (this._empre)
-                    this._empre.cerrarPantallaEpresas();
+                    this._empre.cerrarPantallaEmpresa();
                 if (this._circ)
                     this._circ.cerrarPantallaCirculos();
             });
@@ -36,9 +36,9 @@ var app;
                 .text("Empresas")
                 .on("click", () => {
                 if (!this._empre) {
-                    this._empre = new empresas.C_empresas();
+                    this._empre = new empresas.ControladorEmpresa();
                 }
-                this._empre.abrirPantallaEmpresas();
+                this._empre.abrirPantallaEmpresa();
                 if (this._user)
                     this._user.cerrarPantallaUsuarios();
                 if (this._circ)

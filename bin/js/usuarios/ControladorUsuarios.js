@@ -11,8 +11,6 @@ var usuarios;
 (function (usuarios) {
     class ControladorUsuarios {
         constructor() {
-            this.columnaActiva = 'nombre';
-            this.direccionActiva = 'asc';
             this.ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios",
                 ancho: 800,
@@ -32,6 +30,10 @@ var usuarios;
             this.vista.onFiltro((nombre, idEmpresa) => {
                 this.filtrar(nombre, idEmpresa);
             });
+            this.vista.onOrdenar = (campo, asc) => {
+                const ordenados = this.modelo.ordenarUsuarios(campo, asc);
+                this.vista.renderizarUser(ordenados);
+            };
         }
         abrirPantallaUusuarios() {
             this.ventana.mostrar();
