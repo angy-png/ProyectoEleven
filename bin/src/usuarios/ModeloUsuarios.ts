@@ -1,7 +1,9 @@
 namespace usuarios {
+    
+    // ===================== Interfaces =====================
     export interface I_Usuarios {
         id: number;
-        nombre: string,
+        nombre: string;
         apellidoPaterno: string;
         apellidoMaterno: string;
         usuario: string;
@@ -12,9 +14,10 @@ namespace usuarios {
 
     export interface I_columna {
         titulo: string;
-        campo: keyof I_Usuarios;
+        campo: keyof I_Usuarios | null;
     }
 
+    // ===================== Modelo =====================
     export class ModeloUsuarios {
         private usuarios: Map<number, I_Usuarios> = new Map();
 
@@ -22,18 +25,28 @@ namespace usuarios {
             return Array.from(this.usuarios.values());
         }
 
-        public obtener(id: number): I_Usuarios | undefined {
-            return this.usuarios.get(id);
+        public agregar(usuario: I_Usuarios): void {
+            this.usuarios.set(usuario.id, usuario);
         }
 
-        public async cargarUser(recargarJson: boolean = true) {
-            if (recargarJson) {
-                const response = await fetch("../bin/datos.json");
+        public actualizar(id: number, usuario: Partial<I_Usuarios>): void {
+            const existente = this.usuarios.get(id);
+            if (existente) {
+                this.usuarios.set(id, { ...existente, ...usuario });
+            }
+        }
 
-                const data = await response.json();
-                this.usuarios.clear();
+        public eliminar(id: number): void {
+            this.usuarios.delete(id);
+        }
 
-                for (let i = 0; i < data.length; i++) {
+        public limpiar(): void {
+            this.usuarios.clear();
+        }
+
+        public cargarDesdeJson(data: any[]): void {
+            this.usuarios.clear();
+ for (let i = 0; i < data.length; i++) {
                     const item = data[i];
 
                     const userNuevo: I_Usuarios = {
@@ -45,47 +58,15 @@ namespace usuarios {
                         id_empresa: item.id_empresa !== undefined && item.id_empresa !== null ? Number(item.id_empresa) : 0,
                         correo: item.correo ? String(item.correo) : "",
                         telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
-
                     }
-                    this.usuarios.set(userNuevo.id, userNuevo);
-
-                    console.log(userNuevo);
+                   this.usuarios.set(userNuevo.id, userNuevo);
                 }
-
-
-            }
         }
 
-        public eliminar(id: number): void {
-            this.usuarios.delete(id);
+        public obtenerUsuariosPorEmpresa(idEmpresa: number): I_Usuarios[] {
+            return this.obtenerTodos().filter(u => u.id_empresa === idEmpresa);
         }
 
-        public agregar(usuario: I_Usuarios): void {
-            console.log(usuario);
-            usuario.id = this.usuarios.size + 1; // asignar id incremental
-            this.usuarios.set(usuario.id, usuario);
-        }
-
-        public editar(id: number, usuarioActualizado: Partial<I_Usuarios>): void {
-            const existente = this.usuarios.get(id);
-            if (existente) {
-                this.usuarios.set(id, { ...existente, ...usuarioActualizado });
-                console.log(usuarioActualizado);
-            }
-        }
-
-        public obtenerEmpresas(): number[] {
-            return Array.from(
-                new Set(Array.from(this.usuarios.values()).map(u => u.id_empresa))
-            );
-        }
-
-        public ordenarUsuarios(propiedad: keyof I_Usuarios, asc: boolean = true): I_Usuarios[] {
-    const todos = this.obtenerTodos();
-    return ordenar(todos, propiedad, asc);
+        
+    }
 }
-
-
- 
-
-}}

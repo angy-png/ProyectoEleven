@@ -1,40 +1,47 @@
 var empresas;
 (function (empresas) {
-    class VistaEmpresa {
-        constructor(ventana) {
-            this.ventana = ventana;
-        }
-        crearModalUsuario() {
-            this.ventana = new ventanaControl.ventanaControl({
-                id: "modal-empresa",
-                ancho: 400,
-                alto: 350,
-                colorFondo: "#a5c9f1ff",
-                titulo: "Usuario",
-                modal: true,
-                onClose: () => console.log("Modal empresa cerrado"),
+    class VistaEmpresas {
+        constructor() {
+            this.formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
+            this.formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
+            this._ventana = new ventanaControl.ventanaControl({
+                id: "VentanaEmpresas",
+                ancho: 900, alto: 400,
+                colorFondo: "white", titulo: "Empresas",
+                onClose() {
+                    console.log("ventana empresas fue cerrada");
+                },
             });
+            this._conten = this._ventana._contenedor;
+            this.crearControles();
+            this.crearTabla();
+            this.crearModal();
+            this.crearModalConfirmacion();
         }
         crearControles() {
-            const contenedorInput = this.ventana._contenido
+            const contenedorInput = this._conten
                 .append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
-            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por empresa");
-            const aplicarFiltro = () => {
-                const textoBusqueda = inputTexto.property("value") || "";
-            };
-            inputTexto.on("input", aplicarFiltro);
+            const inputTexto = contenedorInput.append("input")
+                .attr("type", "text")
+                .attr("placeholder", "Filtrar por empresa");
+            inputTexto.on("input", () => {
+                var _a;
+                const texto = inputTexto.property("value") || "";
+                (_a = this.onFiltrar) === null || _a === void 0 ? void 0 : _a.call(this, texto);
+            });
             contenedorInput.append("img")
                 .attr("src", "images/nuevo.svg")
                 .attr("width", 30)
                 .attr("height", 30)
                 .style("cursor", "pointer")
-                .style("margin-left", "auto");
+                .style("margin-left", "auto")
+                .on("click", () => { var _a; return (_a = this.onAgregarEditar) === null || _a === void 0 ? void 0 : _a.call(this, "agregar"); });
         }
-        crearTablaUser() {
-            const tabla = this.ventana._contenido.append("table")
-                .attr("id", "tabla-usuarios")
+        crearTabla() {
+            const tabla = this._conten.append("table")
+                .attr("id", "tabla-empresas")
                 .style("width", "100%")
                 .style("border-collapse", "collapse")
                 .style("margin-top", "20px");
@@ -65,13 +72,11 @@ var empresas;
                 }
                 const cont = th.append("div")
                     .style("display", "flex")
-                    .style("justify-content", "space-between")
-                    .style("align-items", "center");
+                    .style("justify-content", "space-between");
                 cont.append("span").text(d.titulo);
                 const flechas = cont.append("span")
                     .style("display", "flex")
-                    .style("flex-direction", "column")
-                    .style("line-height", "8px");
+                    .style("flex-direction", "column");
                 flechas.append("span")
                     .attr("class", "flecha-asc")
                     .style("cursor", "pointer")
@@ -85,25 +90,26 @@ var empresas;
                     .style("color", "gray")
                     .text("▼");
             })
-                // d: datos de columna, indice arreglo de nodos 
                 .each((d, i, nodes) => {
                 if (!d.campo)
                     return;
                 const th = d3.select(nodes[i]);
-                const asc = th.select(".flecha-asc");
-                const desc = th.select(".flecha-desc");
-                asc.on("click", () => {
-                    columnaActiva = d.campo; //no nulo 
+                th.select(".flecha-asc").on("click", () => {
+                    var _a;
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, true);
+                    columnaActiva = d.campo;
                     direccionActiva = 'asc';
                     actualizarFlechas();
                 });
-                desc.on("click", () => {
+                th.select(".flecha-desc").on("click", () => {
+                    var _a;
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, false);
                     columnaActiva = d.campo;
                     direccionActiva = 'desc';
                     actualizarFlechas();
                 });
             });
-            tabla.append("tbody").attr("id", "tabla-usuarios-body");
+            tabla.append("tbody").attr("id", "tabla-empresas-body");
             const actualizarFlechas = () => {
                 trHead.selectAll("th").each((d, i, nodes) => {
                     if (!d.campo)
@@ -122,16 +128,25 @@ var empresas;
                 });
             };
         }
-        renderizarUser(data) {
-            const tbody = d3.select("#tabla-usuarios-body");
+        crearModal() {
+            this._ventanaModal = new ventanaControl.ventanaControl({
+                id: "modal-empresa",
+                ancho: 400,
+                alto: 350,
+                colorFondo: "#a5c9f1ff",
+                titulo: "Empresa",
+                modal: true,
+                onClose: () => console.log("Modal empresa cerrado"),
+            });
+        }
+        renderTabla(data) {
+            const tbody = d3.select("#tabla-empresas-body");
             const columnas = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
             const filas = tbody.selectAll("tr")
                 .data(data, d => d.id)
                 .join(enter => {
                 const tr = enter.append("tr");
-                // Columna de acciones
                 const acciones = tr.append("td")
-                    .classed("acciones", true)
                     .style("border", "1px solid black")
                     .style("padding", "6px")
                     .append("div")
@@ -141,32 +156,144 @@ var empresas;
                     .attr("src", "images/editar.svg")
                     .attr("width", 20)
                     .attr("height", 20)
-                    .style("cursor", "pointer");
+                    .style("cursor", "pointer")
+                    .on("click", (event, d) => { var _a; return (_a = this.onAgregarEditar) === null || _a === void 0 ? void 0 : _a.call(this, "editar", d); });
                 acciones.append("img")
                     .attr("src", "images/eliminar.svg")
                     .attr("width", 20)
                     .attr("height", 20)
-                    .style("cursor", "pointer");
-                for (let i = 0; i < columnas.length; i++) {
-                    const clave = columnas[i];
+                    .style("cursor", "pointer")
+                    .on("click", (event, d) => { var _a; return (_a = this.onEliminar) === null || _a === void 0 ? void 0 : _a.call(this, d); });
+                columnas.forEach((clave, i) => {
                     tr.append("td")
                         .classed(`data-col-${i}`, true)
                         .style("border", "1px solid black")
                         .style("padding", "6px")
-                        .text(d => { var _a; return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—"; });
-                }
+                        .text(d => {
+                        const valor = d[clave];
+                        if (clave === "activo") {
+                            return valor ? "Sí" : "No";
+                        }
+                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
+                    });
+                });
                 return tr;
             }, update => {
-                for (let i = 0; i < columnas.length; i++) {
-                    const clave = columnas[i];
+                columnas.forEach((clave, i) => {
                     update.select(`td.data-col-${i}`)
-                        .text(d => { var _a; return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—"; });
-                }
-                ;
+                        .text(d => {
+                        const valor = d[clave];
+                        if (clave === "activo") {
+                            return valor ? "Sí" : "No";
+                        }
+                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
+                    });
+                });
                 return update;
             }, exit => exit.remove());
         }
+        mostrarModal(datos, guardarCb) {
+            // Limpiar contenido previo
+            this._ventanaModal.limpiarContenido();
+            const modal = this._ventanaModal._contenido;
+            modal.append("h3").text(datos ? "Editar" : "Agregar");
+            const campos = [
+                { id: "nombre", label: "Nombre" },
+                { id: "rfc", label: "RFC" },
+                { id: "telefono", label: "Teléfono" },
+                { id: "activo", label: "Activo" },
+                { id: "fechaRegistro", label: "Fecha de Registro" }
+            ];
+            campos.forEach(campo => {
+                var _a;
+                modal.append("p").text(campo.label);
+                if (campo.id === "activo") {
+                    const select = modal.append("select")
+                        .attr("data-campo", campo.id)
+                        .style("margin-bottom", "10px")
+                        .style("display", "block");
+                    select.append("option").attr("value", "true").text("Sí");
+                    select.append("option").attr("value", "false").text("No");
+                    if (datos)
+                        select.property("value", datos.activo ? "true" : "false");
+                }
+                else if (campo.id === "fechaRegistro") {
+                    const fechaInput = modal.append("input")
+                        .attr("type", "datetime-local")
+                        .attr("data-campo", campo.id)
+                        .style("margin-bottom", "10px")
+                        .style("display", "block");
+                    if (datos)
+                        fechaInput.property("value", this.formatInputFecha(datos.fechaRegistro));
+                }
+                else {
+                    modal.append("input")
+                        .attr("type", "text")
+                        .attr("data-campo", campo.id)
+                        .style("margin-bottom", "10px")
+                        .style("display", "block")
+                        .property("value", (_a = datos === null || datos === void 0 ? void 0 : datos[campo.id]) !== null && _a !== void 0 ? _a : "");
+                }
+            });
+            modal.append("button")
+                .text("Guardar")
+                .on("click", () => {
+                const nuevaEmpresa = {};
+                campos.forEach(campo => {
+                    const input = modal.select(`[data-campo='${campo.id}']`).node();
+                    let valor = input.value;
+                    if (campo.id === "telefono")
+                        valor = Number(valor);
+                    else if (campo.id === "activo")
+                        valor = valor.toLowerCase() === "true";
+                    else if (campo.id === "fechaRegistro")
+                        valor = new Date(valor);
+                    nuevaEmpresa[campo.id] = valor;
+                });
+                guardarCb === null || guardarCb === void 0 ? void 0 : guardarCb(nuevaEmpresa);
+                this._ventanaModal.ocultar();
+            });
+            this._ventanaModal.mostrar();
+        }
+        crearModalConfirmacion() {
+            this._ventanaConfirmacion = new ventanaControl.ventanaControl({
+                id: "modal-confirmacion",
+                ancho: 300,
+                alto: 150,
+                colorFondo: "#f8d7da",
+                titulo: "Confirmar Eliminación",
+                modal: true,
+                onClose: () => console.log("Modal de confirmación cerrado"),
+            });
+        }
+        mostrarConfirmacion(mensaje, confirmarCb) {
+            this._ventanaConfirmacion.limpiarContenido();
+            const contenido = this._ventanaConfirmacion._contenido;
+            contenido.append("p").text(mensaje);
+            const botones = contenido.append("div")
+                .style("margin-top", "10px")
+                .style("text-align", "right");
+            botones.append("button")
+                .text("Cancelar")
+                .style("margin-right", "5px")
+                .on("click", () => this._ventanaConfirmacion.ocultar());
+            botones.append("button")
+                .text("Eliminar")
+                .style("background-color", "#dc3545")
+                .style("color", "white")
+                .on("click", () => {
+                confirmarCb();
+                this._ventanaConfirmacion.ocultar();
+            });
+            this._ventanaConfirmacion.mostrar();
+        }
+        mostrar() {
+            this._ventana.mostrar();
+        }
+        ocultar() {
+            this._ventana.ocultar();
+        }
     }
-    empresas.VistaEmpresa = VistaEmpresa;
+    empresas.VistaEmpresas = VistaEmpresas;
 })(empresas || (empresas = {}));
 //# sourceMappingURL=VistaEmpresas.js.map

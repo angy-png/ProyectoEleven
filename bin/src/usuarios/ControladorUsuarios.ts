@@ -1,103 +1,78 @@
 namespace usuarios {
-
     export class ControladorUsuarios {
         private modelo: ModeloUsuarios;
         private vista: VistaUsuarios;
-        private ventana: ventanaControl.ventanaControl;
 
         constructor() {
-            this.ventana = new ventanaControl.ventanaControl({
-                id: "ventanaUsuarios",
-                ancho: 800,
-                alto: 400,
-                colorFondo: "white",
-                titulo: "Usuarios",
-                onClose() {
-                    console.log("La ventana de usuario fue cerrada")
-                }
-            });
-
             this.modelo = new ModeloUsuarios();
-            this.vista = new VistaUsuarios(this.ventana);
+            this.vista = new VistaUsuarios();
 
-            this.vista.crearControles();
-            this.mostrarTabla();
-            this.vista.crearModalUsuario();
-            this.inicializar();
-            this.vista.onFiltro((nombre, idEmpresa) => {
-                this.filtrar(nombre, idEmpresa);
-            });
-
-               this.vista.onOrdenar = (campo, asc) => {
-                const ordenados = this.modelo.ordenarUsuarios(campo, asc);
-                this.vista.renderizarUser(ordenados);
+            // Callbacks de usuario
+            this.vista.onAgregarEditar = (modo, datos) => this.abrirModal(modo, datos);
+            this.vista.onEliminar = (usuario) => this.eliminar(usuario);
+            this.vista.onFiltrar = (texto, idEmpresa) => this.filtrar(texto, idEmpresa);
+            this.vista.onOrdenar = (campo, asc) => {
+                const datosOrdenados = ordenar(this.modelo.obtenerTodos(), campo, asc);
+                this.vista.renderTabla(datosOrdenados);
             };
-        
 
+            // 🔹 Suscripción al callback de actualización de empresas
+            this.vista.onEmpresasActualizadas = (listaEmpresas) => {
+                // Actualiza select y propiedad interna
+                this.vista.setEmpresas(listaEmpresas);
+                this.vista.empresas = listaEmpresas;
 
+                // Refresca la tabla con filtros actuales
+                const texto = d3.select<HTMLInputElement, unknown>("#filtro-nombre").property("value") || "";
+                const idEmpresa = Number(d3.select<HTMLSelectElement, unknown>("#select-empresa").property("value") || 0);
+                this.filtrar(texto, idEmpresa);
+            };
 
-
-
+            this.cargar();
         }
 
-        public abrirPantallaUusuarios(): void {
-            this.ventana.mostrar();
+        private async cargar(recargarJson: boolean = true) {
+            if (recargarJson) {
+                const response = await fetch("./datos.json");
+                const data = await response.json();
+                this.modelo.cargarDesdeJson(data);
+            }
+            this.vista.renderTabla(this.modelo.obtenerTodos());
         }
 
-        public cerrarPantallaUsuarios(): void {
-            this.ventana.ocultar();
-        }
-
-        public async mostrarTabla(): Promise<void> {
-            this.vista.crearTablaUser();
-            await this.modelo.cargarUser();
-            this.actVistaUser();
-            this.vista.onEliminar((usuario: I_Usuarios) => {
-                this.confirmarEliminar(usuario);
-            });
-        }
-
-        private confirmarEliminar(usuario: I_Usuarios) {
-            this.vista.mostrarModalEliminar(usuario.nombre, () => {
-                this.modelo.eliminar(usuario.id);
-                this.actVistaUser();
-            });
-        }
-
-        public inicializar(): void {
-            this.vista.onGuardar((modo, datos) => {
+        private abrirModal(modo: "agregar" | "editar", datos?: I_Usuarios) {
+            this.vista.mostrarModal(datos, (nuevoUsuario) => {
                 if (modo === "agregar") {
-                    this.modelo.agregar(datos as I_Usuarios);
-                } else if (modo === "editar") {
-                    this.modelo.editar((datos as I_Usuarios).id, datos);
+                    nuevoUsuario.id = this.modelo.obtenerTodos().length + 1;
+                    this.modelo.agregar(nuevoUsuario as I_Usuarios);
+                } else if (modo === "editar" && datos) {
+                    this.modelo.actualizar(datos.id, nuevoUsuario);
                 }
-                this.actVistaUser();
+                this.cargar(false);
             });
+        }
 
-            this.vista.onEliminar(usuario => {
-                this.confirmarEliminar(usuario);
+        private eliminar(usuario: I_Usuarios): void {
+            this.vista.mostrarConfirmacion(
+                `¿Seguro que deseas eliminar al usuario "${usuario.nombre}"?`,
+                () => {
+                    this.modelo.eliminar(usuario.id);
+                    this.cargar(false);
+                }
+            );
+        }
+
+        private filtrar(nombre: string, idEmpresa: number): void {
+            const filtrados = this.modelo.obtenerTodos().filter(u => {
+                const nombreEmpresa = this.vista.empresas.find(e => e.id === u.id_empresa)?.nombre || "";
+                const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
+                const coincideEmpresa = !idEmpresa || u.id_empresa === idEmpresa;
+                return coincideNombre && coincideEmpresa;
             });
-            this.actVistaUser();
+            this.vista.renderTabla(filtrados);
         }
 
-        private actVistaUser(): void {
-            const datosUser = this.modelo.obtenerTodos();
-            this.vista.renderizarUser(datosUser);
-            const empresas = this.modelo.obtenerEmpresas();
-            this.vista.renderSelectEmpresas(empresas);
-
-        }
-        private filtrar(nombre: string, idEmpresa: number) {
-            const filtrados = this.modelo.obtenerTodos()
-                .filter(u => {
-                    const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
-                    const coincideEmpresa = !idEmpresa || u.id_empresa === idEmpresa;
-                    return coincideNombre && coincideEmpresa;
-                });
-            this.vista.renderizarUser(filtrados);
-        }
-
-
-
+        public abrirPantallaUsuarios(): void { this.vista.mostrar(); }
+        public cerrarPantallaUsuarios(): void { this.vista.ocultar(); }
     }
 }

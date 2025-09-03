@@ -10,7 +10,10 @@ namespace usuarios {
         telefono: number;
     }
 
- 
+    export interface I_columna {
+        titulo: string;
+        campo: keyof I_Usuarios;
+    }
 
     export class Usuarios {
         private usuarios: Map<number, I_Usuarios> = new Map();

@@ -8,42 +8,75 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 var empresas;
-(function (empresas) {
-    class ControladorEmpresa {
+(function (empresas_1) {
+    class ControladorEmpresas {
         constructor() {
-            this.ventana = new ventanaControl.ventanaControl({
-                id: "ventanaUsuarios",
-                ancho: 800,
-                alto: 400,
-                colorFondo: "white",
-                titulo: "Usuarios",
-                onClose() {
-                    console.log("La ventana de usuario fue cerrada");
+            this.modelo = new empresas_1.ModeloEmpresas();
+            this.vista = new empresas_1.VistaEmpresas();
+            this.vista.onAgregarEditar = (modo, datos) => this.abrirModal(modo, datos);
+            this.vista.onEliminar = (empresa) => this.eliminar(empresa);
+            this.vista.onFiltrar = (texto) => this.filtrar(texto);
+            this.vista.onOrdenar = (campo, asc) => {
+                const datosOrdenados = usuarios.ordenar(this.modelo.obtenerTodos(), campo, asc);
+                this.vista.renderTabla(datosOrdenados);
+            };
+        }
+        // 🔹 Solo carga datos en el modelo
+        cargar() {
+            return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
+                if (recargarJson) {
+                    const response = yield fetch("./empresas.json");
+                    const data = yield response.json();
+                    this.modelo.cargarDesdeJson(data);
                 }
-            });
-            this.modelo = new empresas.Modelompresas();
-            this.vista = new empresas.VistaEmpresa(this.ventana);
-            this.vista.crearControles();
-            this.mostrarTabla();
-        }
-        abrirPantallaEmpresa() {
-            this.ventana.mostrar();
-        }
-        cerrarPantallaEmpresa() {
-            this.ventana.ocultar();
-        }
-        mostrarTabla() {
-            return __awaiter(this, void 0, void 0, function* () {
-                this.vista.crearTablaUser();
-                yield this.modelo.cargar();
-                this.actVistaUser();
+                // ❌ Ya no llamamos renderTabla aquí
             });
         }
-        actVistaUser() {
-            const datosUser = this.modelo.obtenerTodosEm();
-            this.vista.renderizarUser(datosUser);
+        abrirModal(modo, datos) {
+            this.vista.mostrarModal(datos, (nuevaEmpresa) => {
+                if (modo === "agregar") {
+                    nuevaEmpresa.id = this.modelo.obtenerTodos().length + 1;
+                    this.modelo.agregar(nuevaEmpresa);
+                }
+                else if (modo === "editar" && datos) {
+                    this.modelo.actualizar(datos.id, nuevaEmpresa);
+                }
+                this.refrescarTabla();
+            });
+        }
+        eliminar(empresa) {
+            this.vista.mostrarConfirmacion(`¿Seguro que deseas eliminar la empresa "${empresa.nombre}"?`, () => {
+                this.modelo.eliminar(empresa.id);
+                this.refrescarTabla();
+            });
+        }
+        obtenerTodos() {
+            return this.modelo.obtenerTodos();
+        }
+        filtrar(nombre) {
+            const filtrados = this.modelo.obtenerTodos().filter(e => !nombre || e.nombre.toLowerCase().includes(nombre.toLowerCase()));
+            this.vista.renderTabla(filtrados);
+        }
+        // 🔹 Ahora la tabla se dibuja aquí
+        abrirPantallaEmpresas() {
+            this.refrescarTabla();
+            this.vista.mostrar();
+        }
+        cerrarPantallaEmpresas() {
+            this.vista.ocultar();
+        }
+        refrescarTabla() {
+            var _a;
+            const todas = this.modelo.obtenerTodos();
+            this.vista.renderTabla(todas);
+            (_a = this.onEmpresasActualizadas) === null || _a === void 0 ? void 0 : _a.call(this, todas); // 🔔 notificar
+        }
+        refrescarUsuarios() {
+            var _a, _b;
+            this.refrescarTabla(); // primero refresca tabla de empresas
+            (_b = (_a = this.vista).onEmpresasActualizadas) === null || _b === void 0 ? void 0 : _b.call(_a, this.modelo.obtenerTodos());
         }
     }
-    empresas.ControladorEmpresa = ControladorEmpresa;
+    empresas_1.ControladorEmpresas = ControladorEmpresas;
 })(empresas || (empresas = {}));
 //# sourceMappingURL=ControladorEmpresas.js.map

@@ -11,82 +11,68 @@ var usuarios;
 (function (usuarios) {
     class ControladorUsuarios {
         constructor() {
-            this.ventana = new ventanaControl.ventanaControl({
-                id: "ventanaUsuarios",
-                ancho: 800,
-                alto: 400,
-                colorFondo: "white",
-                titulo: "Usuarios",
-                onClose() {
-                    console.log("La ventana de usuario fue cerrada");
-                }
-            });
             this.modelo = new usuarios.ModeloUsuarios();
-            this.vista = new usuarios.VistaUsuarios(this.ventana);
-            this.vista.crearControles();
-            this.mostrarTabla();
-            this.vista.crearModalUsuario();
-            this.inicializar();
-            this.vista.onFiltro((nombre, idEmpresa) => {
-                this.filtrar(nombre, idEmpresa);
-            });
+            this.vista = new usuarios.VistaUsuarios();
+            // Callbacks de usuario
+            this.vista.onAgregarEditar = (modo, datos) => this.abrirModal(modo, datos);
+            this.vista.onEliminar = (usuario) => this.eliminar(usuario);
+            this.vista.onFiltrar = (texto, idEmpresa) => this.filtrar(texto, idEmpresa);
             this.vista.onOrdenar = (campo, asc) => {
-                const ordenados = this.modelo.ordenarUsuarios(campo, asc);
-                this.vista.renderizarUser(ordenados);
+                const datosOrdenados = usuarios.ordenar(this.modelo.obtenerTodos(), campo, asc);
+                this.vista.renderTabla(datosOrdenados);
             };
+            // 🔹 Suscripción al callback de actualización de empresas
+            this.vista.onEmpresasActualizadas = (listaEmpresas) => {
+                // Actualiza select y propiedad interna
+                this.vista.setEmpresas(listaEmpresas);
+                this.vista.empresas = listaEmpresas;
+                // Refresca la tabla con filtros actuales
+                const texto = d3.select("#filtro-nombre").property("value") || "";
+                const idEmpresa = Number(d3.select("#select-empresa").property("value") || 0);
+                this.filtrar(texto, idEmpresa);
+            };
+            this.cargar();
         }
-        abrirPantallaUusuarios() {
-            this.ventana.mostrar();
-        }
-        cerrarPantallaUsuarios() {
-            this.ventana.ocultar();
-        }
-        mostrarTabla() {
-            return __awaiter(this, void 0, void 0, function* () {
-                this.vista.crearTablaUser();
-                yield this.modelo.cargarUser();
-                this.actVistaUser();
-                this.vista.onEliminar((usuario) => {
-                    this.confirmarEliminar(usuario);
-                });
+        cargar() {
+            return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
+                if (recargarJson) {
+                    const response = yield fetch("./datos.json");
+                    const data = yield response.json();
+                    this.modelo.cargarDesdeJson(data);
+                }
+                this.vista.renderTabla(this.modelo.obtenerTodos());
             });
         }
-        confirmarEliminar(usuario) {
-            this.vista.mostrarModalEliminar(usuario.nombre, () => {
-                this.modelo.eliminar(usuario.id);
-                this.actVistaUser();
-            });
-        }
-        inicializar() {
-            this.vista.onGuardar((modo, datos) => {
+        abrirModal(modo, datos) {
+            this.vista.mostrarModal(datos, (nuevoUsuario) => {
                 if (modo === "agregar") {
-                    this.modelo.agregar(datos);
+                    nuevoUsuario.id = this.modelo.obtenerTodos().length + 1;
+                    this.modelo.agregar(nuevoUsuario);
                 }
-                else if (modo === "editar") {
-                    this.modelo.editar(datos.id, datos);
+                else if (modo === "editar" && datos) {
+                    this.modelo.actualizar(datos.id, nuevoUsuario);
                 }
-                this.actVistaUser();
+                this.cargar(false);
             });
-            this.vista.onEliminar(usuario => {
-                this.confirmarEliminar(usuario);
-            });
-            this.actVistaUser();
         }
-        actVistaUser() {
-            const datosUser = this.modelo.obtenerTodos();
-            this.vista.renderizarUser(datosUser);
-            const empresas = this.modelo.obtenerEmpresas();
-            this.vista.renderSelectEmpresas(empresas);
+        eliminar(usuario) {
+            this.vista.mostrarConfirmacion(`¿Seguro que deseas eliminar al usuario "${usuario.nombre}"?`, () => {
+                this.modelo.eliminar(usuario.id);
+                this.cargar(false);
+            });
         }
         filtrar(nombre, idEmpresa) {
-            const filtrados = this.modelo.obtenerTodos()
-                .filter(u => {
+            const filtrados = this.modelo.obtenerTodos().filter(u => {
+                var _a;
+                const nombreEmpresa = ((_a = this.vista.empresas.find(e => e.id === u.id_empresa)) === null || _a === void 0 ? void 0 : _a.nombre) || "";
                 const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
                 const coincideEmpresa = !idEmpresa || u.id_empresa === idEmpresa;
                 return coincideNombre && coincideEmpresa;
             });
-            this.vista.renderizarUser(filtrados);
+            this.vista.renderTabla(filtrados);
         }
+        abrirPantallaUsuarios() { this.vista.mostrar(); }
+        cerrarPantallaUsuarios() { this.vista.ocultar(); }
     }
     usuarios.ControladorUsuarios = ControladorUsuarios;
 })(usuarios || (usuarios = {}));
