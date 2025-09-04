@@ -9,7 +9,7 @@ namespace usuarios {
         public onEliminar?: (usuario: I_Usuarios) => void;
         public onOrdenar?: (campo: keyof I_Usuarios, asc: boolean) => void;
         public onFiltrar?: (texto: string, idEmpresa: number) => void;
-public onEmpresasActualizadas?: (listaEmpresas: empresas.I_empresas[]) => void;
+        public onEmpresasActualizadas?: (listaEmpresas: empresas.I_empresas[]) => void;
 
         constructor() {
             this._ventana = new ventanaControl.ventanaControl({
@@ -234,6 +234,8 @@ public onEmpresasActualizadas?: (listaEmpresas: empresas.I_empresas[]) => void;
             });
         }
 
+
+        
         public mostrarModal(datos?: I_Usuarios, guardarCb?: (nuevo: Partial<I_Usuarios>) => void): void {
             const modal = this._ventanaModal._contenido;
             this._ventanaModal.limpiarContenido();

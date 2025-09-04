@@ -1,6 +1,5 @@
 var usuarios;
 (function (usuarios) {
-    // ===================== Modelo =====================
     class ModeloUsuarios {
         constructor() {
             this.usuarios = new Map();

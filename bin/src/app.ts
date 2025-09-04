@@ -1,8 +1,7 @@
 namespace app {
     export class main {
         _circ: circulos.ControladorCirculos | null = null;
-        _user: usuarios.ControladorUsuarios | null = null;
-        _empre: empresas.ControladorEmpresas | null = null;
+        _user: usuarios.ControladorUsuarios | null = null; 
         _empreMo: empresas.ModeloEmpresas | null = null;
 
         constructor() {
@@ -17,8 +16,8 @@ namespace app {
         .on("click", () => {
             if (!this._circ) this._circ = new circulos.ControladorCirculos();
             this._circ.abrirPantallaCirculos();
-            if (this._user) this._user.cerrarPantallaUsuarios();
-            if (this._empre) this._empre.cerrarPantallaEmpresas();
+            if (this._user) this._user.cerrarPantalla();
+           
         });
 
     d3.select("body")
@@ -27,10 +26,10 @@ namespace app {
         .on("click", () => {
             if (!this._user) {
                 this._user = new usuarios.ControladorUsuarios();
-                this._user["vista"].setEmpresas(listaEmpresas);
+                
             }
-            this._user.abrirPantallaUsuarios();
-            if (this._empre) this._empre.cerrarPantallaEmpresas();
+            this._user.abrirPantalla();
+            ;
             if (this._circ) this._circ.cerrarPantallaCirculos();
         });
 
@@ -38,8 +37,8 @@ namespace app {
         .append("button")
         .text("Empresas")
         .on("click", () => {
-            if (this._empre) this._empre.abrirPantallaEmpresas();
-            if (this._user) this._user.cerrarPantallaUsuarios();
+           
+            if (this._user) this._user.cerrarPantalla();
             if (this._circ) this._circ.cerrarPantallaCirculos();
         });
 
@@ -49,19 +48,10 @@ namespace app {
         .style("padding", "10px 20px")
         .style("cursor", "pointer");
 
-this._empre = new empresas.ControladorEmpresas();
-await this._empre.cargar();
-const listaEmpresas = this._empre.obtenerTodos();
+ 
+ 
 
-this._empre.onEmpresasActualizadas = (empresas) => {
-    if (this._user) {
-        this._user["vista"].setEmpresas(empresas); // 🔄 recargar en Usuarios
-    }
-};
-
-}
-
-    }
+    }  }
 
     let _main: app.main = new app.main();
 }
