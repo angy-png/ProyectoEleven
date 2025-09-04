@@ -13,7 +13,6 @@ var app;
         constructor() {
             this._circ = null;
             this._user = null;
-            this._empreMo = null;
             this.inicializar();
         }
         inicializar() {

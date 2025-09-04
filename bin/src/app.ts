@@ -1,8 +1,7 @@
 namespace app {
     export class main {
         _circ: circulos.ControladorCirculos | null = null;
-        _user: usuarios.ControladorUsuarios | null = null; 
-        _empreMo: empresas.ModeloEmpresas | null = null;
+        _user: usuarios.ControladorUsuarios | null = null;  
 
         constructor() {
             this.inicializar();
