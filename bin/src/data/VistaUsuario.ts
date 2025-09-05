@@ -119,17 +119,19 @@ namespace usuarios {
                     if (!d.campo) return;
                     const th = d3.select(nodes[i]);
                     th.select(".flecha-asc").on("click", () => {
-                        this.onOrdenar?.(d.campo!, true);
+                        this.onOrdenar?.(d.campo!, true);   // 🔹 avisa al controlador
                         columnaActiva = d.campo!;
                         direccionActiva = 'asc';
                         actualizarFlechas();
                     });
+
                     th.select(".flecha-desc").on("click", () => {
-                        this.onOrdenar?.(d.campo!, false);
+                        this.onOrdenar?.(d.campo!, false);  // 🔹 avisa al controlador
                         columnaActiva = d.campo!;
                         direccionActiva = 'desc';
                         actualizarFlechas();
                     });
+
                 });
 
             tabla.append("tbody").attr("id", "tabla-usuario-body");
@@ -183,10 +185,7 @@ namespace usuarios {
                                 .style("border", "1px solid black")
                                 .style("padding", "6px")
                                 .text(d => {
-                                    if (clave === "id_empresa") {
-                                        const empresa = this.empresas.find(e => e.id === d.id_empresa);
-                                        return empresa ? empresa.nombre : "—";
-                                    }
+                                    
                                     return (d as any)[clave] ?? "—";
                                 });
 
@@ -196,10 +195,7 @@ namespace usuarios {
                     update => {
                         columnas.forEach((clave, i) => {
                             update.select(`td.data-col-${i}`).text(d => {
-                                if (clave === "id_empresa") {
-                                    const empresa = this.empresas.find(e => e.id === d.id_empresa);
-                                    return empresa ? empresa.nombre : "—";
-                                }
+                                
                                 return (d as any)[clave] ?? "—";
                             });
                         });
@@ -234,8 +230,6 @@ namespace usuarios {
             });
         }
 
-
-        
         public mostrarModal(datos?: I_Usuarios, guardarCb?: (nuevo: Partial<I_Usuarios>) => void): void {
             const modal = this._ventanaModal._contenido;
             this._ventanaModal.limpiarContenido();
@@ -295,17 +289,6 @@ namespace usuarios {
         public mostrar(): void { this._ventana.mostrar(); }
         public ocultar(): void { this._ventana.ocultar(); }
 
-
-        public setEmpresas(empresas: empresas.I_empresas[]): void {
-            this.empresas = empresas;
-
-            const select = d3.select<HTMLSelectElement, unknown>("#select-empresa");
-            select.selectAll("option").remove();
-
-            select.append("option").attr("value", "0").text("Todas");
-            this.empresas.forEach(e => {
-                select.append("option").attr("value", e.id.toString()).text(e.nombre);
-            });
-        }
+       
     }
 } 

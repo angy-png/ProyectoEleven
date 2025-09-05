@@ -5,24 +5,13 @@ var usuarios;
             const modelo = new usuarios.ModeloUsuarios();
             const vista = new usuarios.VistaUsuarios();
             super(modelo, vista);
-            // Callbacks adicionales específicos de usuarios
             this.vista.onFiltrar = (texto, idEmpresa) => this.filtrar(texto, idEmpresa);
             this.vista.onOrdenar = (campo, asc) => {
-                const datosOrdenados = usuarios.ordenar(this.modelo.obtenerTodos(), campo, asc);
+                const datosOrdenados = controladorBase.ordenar(this.modelo.obtenerTodos(), campo, asc);
                 this.vista.renderTabla(datosOrdenados);
             };
-            // 🔹 Suscripción al callback de actualización de empresas
-            this.vista.onEmpresasActualizadas = (listaEmpresas) => {
-                this.vista.setEmpresas(listaEmpresas);
-                this.vista.empresas = listaEmpresas;
-                const texto = d3.select("#filtro-nombre").property("value") || "";
-                const idEmpresa = Number(d3.select("#select-empresa").property("value") || 0);
-                this.filtrar(texto, idEmpresa);
-            };
-            // Cargar datos
             this.cargar("./datos/datos.json");
         }
-        // 👇 Solo métodos específicos de usuarios
         filtrar(nombre, idEmpresa) {
             const filtrados = this.modelo.obtenerTodos().filter(u => {
                 var _a;

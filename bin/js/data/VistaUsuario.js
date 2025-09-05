@@ -102,14 +102,14 @@ var usuarios;
                 const th = d3.select(nodes[i]);
                 th.select(".flecha-asc").on("click", () => {
                     var _a;
-                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, true);
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, true); // 🔹 avisa al controlador
                     columnaActiva = d.campo;
                     direccionActiva = 'asc';
                     actualizarFlechas();
                 });
                 th.select(".flecha-desc").on("click", () => {
                     var _a;
-                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, false);
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, false); // 🔹 avisa al controlador
                     columnaActiva = d.campo;
                     direccionActiva = 'desc';
                     actualizarFlechas();
@@ -162,10 +162,6 @@ var usuarios;
                         .style("padding", "6px")
                         .text(d => {
                         var _a;
-                        if (clave === "id_empresa") {
-                            const empresa = this.empresas.find(e => e.id === d.id_empresa);
-                            return empresa ? empresa.nombre : "—";
-                        }
                         return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
                     });
                 });
@@ -174,10 +170,6 @@ var usuarios;
                 columnas.forEach((clave, i) => {
                     update.select(`td.data-col-${i}`).text(d => {
                         var _a;
-                        if (clave === "id_empresa") {
-                            const empresa = this.empresas.find(e => e.id === d.id_empresa);
-                            return empresa ? empresa.nombre : "—";
-                        }
                         return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
                     });
                 });
@@ -257,15 +249,6 @@ var usuarios;
         }
         mostrar() { this._ventana.mostrar(); }
         ocultar() { this._ventana.ocultar(); }
-        setEmpresas(empresas) {
-            this.empresas = empresas;
-            const select = d3.select("#select-empresa");
-            select.selectAll("option").remove();
-            select.append("option").attr("value", "0").text("Todas");
-            this.empresas.forEach(e => {
-                select.append("option").attr("value", e.id.toString()).text(e.nombre);
-            });
-        }
     }
     usuarios.VistaUsuarios = VistaUsuarios;
 })(usuarios || (usuarios = {}));

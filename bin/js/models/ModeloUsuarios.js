@@ -19,9 +19,6 @@ var usuarios;
                 });
             });
         }
-        obtenerUsuariosPorEmpresa(idEmpresa) {
-            return this.obtenerTodos().filter(u => u.id_empresa === idEmpresa);
-        }
     }
     usuarios.ModeloUsuarios = ModeloUsuarios;
 })(usuarios || (usuarios = {}));

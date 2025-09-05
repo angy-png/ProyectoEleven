@@ -2,15 +2,18 @@ var empresas;
 (function (empresas) {
     class VistaEmpresas {
         constructor() {
+            this.empresasCache = [];
             this.formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
             this.formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
             this._ventana = new ventanaControl.ventanaControl({
-                id: "VentanaEmpresas",
-                ancho: 900, alto: 400,
-                colorFondo: "white", titulo: "Empresas",
+                id: "ventanaEmpresas",
+                ancho: 900,
+                alto: 400,
+                colorFondo: "white",
+                titulo: "Empresas",
                 onClose() {
-                    console.log("ventana empresas fue cerrada");
-                },
+                    console.log("Ventana empresas cerrada");
+                }
             });
             this._conten = this._ventana._contenedor;
             this.crearControles();
@@ -19,25 +22,78 @@ var empresas;
             this.crearModalConfirmacion();
         }
         crearControles() {
-            const contenedorInput = this._conten
-                .append("div")
+            const cont = this._conten.append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
-            const inputTexto = contenedorInput.append("input")
+            const inputTexto = cont.append("input")
                 .attr("type", "text")
-                .attr("placeholder", "Filtrar por empresa");
-            inputTexto.on("input", () => {
+                .attr("placeholder", "Filtrar por nombre");
+            const aplicarFiltro = () => {
                 var _a;
-                const texto = inputTexto.property("value") || "";
-                (_a = this.onFiltrar) === null || _a === void 0 ? void 0 : _a.call(this, texto);
-            });
-            contenedorInput.append("img")
+                const textoBusqueda = inputTexto.property("value") || "";
+                (_a = this.onFiltrar) === null || _a === void 0 ? void 0 : _a.call(this, textoBusqueda);
+            };
+            inputTexto.on("input", aplicarFiltro);
+            cont.append("img")
                 .attr("src", "images/nuevo.svg")
                 .attr("width", 30)
                 .attr("height", 30)
                 .style("cursor", "pointer")
                 .style("margin-left", "auto")
                 .on("click", () => { var _a; return (_a = this.onAgregarEditar) === null || _a === void 0 ? void 0 : _a.call(this, "agregar"); });
+        }
+        renderTabla(data) {
+            this.empresasCache = data;
+            const tbody = d3.select("#tabla-empresas-body");
+            const columnas = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
+            tbody.selectAll("tr")
+                .data(data, d => d.id)
+                .join(enter => {
+                const tr = enter.append("tr");
+                const acciones = tr.append("td").style("border", "1px solid black");
+                const cont = acciones.append("div").style("display", "flex").style("gap", "10px");
+                cont.append("img")
+                    .attr("src", "images/editar.svg")
+                    .attr("width", 20)
+                    .attr("height", 20)
+                    .style("cursor", "pointer")
+                    .on("click", (_, d) => { var _a; return (_a = this.onAgregarEditar) === null || _a === void 0 ? void 0 : _a.call(this, "editar", d); });
+                cont.append("img")
+                    .attr("src", "images/eliminar.svg")
+                    .attr("width", 20)
+                    .attr("height", 20)
+                    .style("cursor", "pointer")
+                    .on("click", (_, d) => { var _a; return (_a = this.onEliminar) === null || _a === void 0 ? void 0 : _a.call(this, d); });
+                for (let i = 0; i < columnas.length; i++) {
+                    const clave = columnas[i];
+                    tr.append("td")
+                        .classed(`data-col-${i}`, true)
+                        .style("border", "1px solid black")
+                        .style("padding", "6px")
+                        .text(d => {
+                        const valor = d[clave];
+                        if (clave === 'activo') {
+                            return valor ? "Si" : "No";
+                        }
+                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
+                    });
+                }
+                return tr;
+            }, update => {
+                for (let i = 0; i < columnas.length; i++) {
+                    const clave = columnas[i];
+                    update.select(`td.data-col-${i}`)
+                        .text(d => {
+                        const valor = d[clave];
+                        if (clave === 'activo') {
+                            return valor ? "Si" : "No";
+                        }
+                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
+                    });
+                }
+                ;
+                return update;
+            }, exit => exit.remove());
         }
         crearTabla() {
             const tabla = this._conten.append("table")
@@ -72,11 +128,13 @@ var empresas;
                 }
                 const cont = th.append("div")
                     .style("display", "flex")
-                    .style("justify-content", "space-between");
+                    .style("justify-content", "space-between")
+                    .style("aling-items", "center");
                 cont.append("span").text(d.titulo);
                 const flechas = cont.append("span")
                     .style("display", "flex")
-                    .style("flex-direction", "column");
+                    .style("flex-direction", "column")
+                    .style("line-height", "8px");
                 flechas.append("span")
                     .attr("class", "flecha-asc")
                     .style("cursor", "pointer")
@@ -139,100 +197,47 @@ var empresas;
                 onClose: () => console.log("Modal empresa cerrado"),
             });
         }
-        renderTabla(data) {
-            const tbody = d3.select("#tabla-empresas-body");
-            const columnas = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
-            const filas = tbody.selectAll("tr")
-                .data(data, d => d.id)
-                .join(enter => {
-                const tr = enter.append("tr");
-                const acciones = tr.append("td")
-                    .style("border", "1px solid black")
-                    .style("padding", "6px")
-                    .append("div")
-                    .style("display", "flex")
-                    .style("gap", "10px");
-                acciones.append("img")
-                    .attr("src", "images/editar.svg")
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .style("cursor", "pointer")
-                    .on("click", (event, d) => { var _a; return (_a = this.onAgregarEditar) === null || _a === void 0 ? void 0 : _a.call(this, "editar", d); });
-                acciones.append("img")
-                    .attr("src", "images/eliminar.svg")
-                    .attr("width", 20)
-                    .attr("height", 20)
-                    .style("cursor", "pointer")
-                    .on("click", (event, d) => { var _a; return (_a = this.onEliminar) === null || _a === void 0 ? void 0 : _a.call(this, d); });
-                columnas.forEach((clave, i) => {
-                    tr.append("td")
-                        .classed(`data-col-${i}`, true)
-                        .style("border", "1px solid black")
-                        .style("padding", "6px")
-                        .text(d => {
-                        const valor = d[clave];
-                        if (clave === "activo") {
-                            return valor ? "Sí" : "No";
-                        }
-                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
-                    });
-                });
-                return tr;
-            }, update => {
-                columnas.forEach((clave, i) => {
-                    update.select(`td.data-col-${i}`)
-                        .text(d => {
-                        const valor = d[clave];
-                        if (clave === "activo") {
-                            return valor ? "Sí" : "No";
-                        }
-                        return valor instanceof Date ? this.formatFecha(valor) : String(valor);
-                    });
-                });
-                return update;
-            }, exit => exit.remove());
+        crearModalConfirmacion() {
+            this._ventanaConfirmacion = new ventanaControl.ventanaControl({
+                id: "modal-confirmacion-empresa",
+                ancho: 300,
+                alto: 150,
+                colorFondo: "#f8d7da",
+                titulo: "Confirmar Eliminación",
+                modal: true,
+                onClose: () => console.log("Modal empresa cerrado"),
+            });
         }
         mostrarModal(datos, guardarCb) {
-            // Limpiar contenido previo
-            this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
-            modal.append("h3").text(datos ? "Editar" : "Agregar");
-            const campos = [
-                { id: "nombre", label: "Nombre" },
-                { id: "rfc", label: "RFC" },
-                { id: "telefono", label: "Teléfono" },
-                { id: "activo", label: "Activo" },
-                { id: "fechaRegistro", label: "Fecha de Registro" }
-            ];
+            this._ventanaModal.limpiarContenido();
+            const modalIdPrefix = `modal-${Date.now()}`;
+            modal.append("h3").text(datos ? "Editar Empresa" : "Agregar Empresa");
+            const campos = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
             campos.forEach(campo => {
                 var _a;
-                modal.append("p").text(campo.label);
-                if (campo.id === "activo") {
-                    const select = modal.append("select")
-                        .attr("data-campo", campo.id)
-                        .style("margin-bottom", "10px")
-                        .style("display", "block");
+                const inputId = `${modalIdPrefix}-${campo}`; // ID único
+                modal.append("p").text(campo);
+                if (campo === "activo") {
+                    const select = modal.append("select").attr("id", inputId);
                     select.append("option").attr("value", "true").text("Sí");
                     select.append("option").attr("value", "false").text("No");
                     if (datos)
                         select.property("value", datos.activo ? "true" : "false");
                 }
-                else if (campo.id === "fechaRegistro") {
-                    const fechaInput = modal.append("input")
+                else if (campo === "fechaRegistro") {
+                    modal.append("input")
+                        .attr("id", inputId)
                         .attr("type", "datetime-local")
-                        .attr("data-campo", campo.id)
-                        .style("margin-bottom", "10px")
-                        .style("display", "block");
-                    if (datos)
-                        fechaInput.property("value", this.formatInputFecha(datos.fechaRegistro));
+                        .style("display", "block")
+                        .property("value", datos ? this.formatInputFecha(datos.fechaRegistro) : "");
                 }
                 else {
                     modal.append("input")
-                        .attr("type", "text")
-                        .attr("data-campo", campo.id)
-                        .style("margin-bottom", "10px")
+                        .attr("id", inputId)
                         .style("display", "block")
-                        .property("value", (_a = datos === null || datos === void 0 ? void 0 : datos[campo.id]) !== null && _a !== void 0 ? _a : "");
+                        .style("margin-bottom", "10px")
+                        .property("value", (_a = datos === null || datos === void 0 ? void 0 : datos[campo]) !== null && _a !== void 0 ? _a : "");
                 }
             });
             modal.append("button")
@@ -240,44 +245,30 @@ var empresas;
                 .on("click", () => {
                 const nuevaEmpresa = {};
                 campos.forEach(campo => {
-                    const input = modal.select(`[data-campo='${campo.id}']`).node();
+                    const input = document.getElementById(`${modalIdPrefix}-${campo}`);
                     let valor = input.value;
-                    if (campo.id === "telefono")
+                    if (campo === "telefono")
                         valor = Number(valor);
-                    else if (campo.id === "activo")
-                        valor = valor.toLowerCase() === "true";
-                    else if (campo.id === "fechaRegistro")
+                    if (campo === "activo")
+                        valor = valor === "true";
+                    if (campo === "fechaRegistro")
                         valor = new Date(valor);
-                    nuevaEmpresa[campo.id] = valor;
+                    nuevaEmpresa[campo] = valor;
                 });
+                console.log("Datos guardados:", nuevaEmpresa);
                 guardarCb === null || guardarCb === void 0 ? void 0 : guardarCb(nuevaEmpresa);
                 this._ventanaModal.ocultar();
             });
             this._ventanaModal.mostrar();
         }
-        crearModalConfirmacion() {
-            this._ventanaConfirmacion = new ventanaControl.ventanaControl({
-                id: "modal-confirmacion",
-                ancho: 300,
-                alto: 150,
-                colorFondo: "#f8d7da",
-                titulo: "Confirmar Eliminación",
-                modal: true,
-                onClose: () => console.log("Modal de confirmación cerrado"),
-            });
-        }
         mostrarConfirmacion(mensaje, confirmarCb) {
+            const modal = this._ventanaConfirmacion._contenido;
             this._ventanaConfirmacion.limpiarContenido();
-            const contenido = this._ventanaConfirmacion._contenido;
-            contenido.append("p").text(mensaje);
-            const botones = contenido.append("div")
-                .style("margin-top", "10px")
-                .style("text-align", "right");
-            botones.append("button")
+            modal.append("p").text(mensaje);
+            modal.append("button")
                 .text("Cancelar")
-                .style("margin-right", "5px")
                 .on("click", () => this._ventanaConfirmacion.ocultar());
-            botones.append("button")
+            modal.append("button")
                 .text("Eliminar")
                 .style("background-color", "#dc3545")
                 .style("color", "white")
@@ -287,12 +278,8 @@ var empresas;
             });
             this._ventanaConfirmacion.mostrar();
         }
-        mostrar() {
-            this._ventana.mostrar();
-        }
-        ocultar() {
-            this._ventana.ocultar();
-        }
+        mostrar() { this._ventana.mostrar(); }
+        ocultar() { this._ventana.ocultar(); }
     }
     empresas.VistaEmpresas = VistaEmpresas;
 })(empresas || (empresas = {}));

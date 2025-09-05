@@ -28,8 +28,6 @@ namespace usuarios {
             }));
         }
 
-        public obtenerUsuariosPorEmpresa(idEmpresa: number): I_Usuarios[] {
-            return this.obtenerTodos().filter(u => u.id_empresa === idEmpresa);
-        }
+       
     }
 }

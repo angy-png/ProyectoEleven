@@ -13,6 +13,7 @@ var app;
         constructor() {
             this._circ = null;
             this._user = null;
+            this._emp = null;
             this.inicializar();
         }
         inicializar() {
@@ -27,23 +28,28 @@ var app;
                     this._circ.abrirPantallaCirculos();
                     if (this._user)
                         this._user.cerrarPantalla();
+                    if (this._emp)
+                        this._emp.cerrarPantalla();
                 });
                 d3.select("body")
                     .append("button")
                     .text("Usuarios")
                     .on("click", () => {
-                    if (!this._user) {
+                    if (!this._user)
                         this._user = new usuarios.ControladorUsuarios();
-                    }
                     this._user.abrirPantalla();
-                    ;
                     if (this._circ)
                         this._circ.cerrarPantallaCirculos();
+                    if (this._emp)
+                        this._emp.cerrarPantalla();
                 });
                 d3.select("body")
                     .append("button")
                     .text("Empresas")
                     .on("click", () => {
+                    if (!this._emp)
+                        this._emp = new empresas.ControladorEmpresas();
+                    this._emp.abrirPantalla();
                     if (this._user)
                         this._user.cerrarPantalla();
                     if (this._circ)

@@ -17,22 +17,24 @@ namespace ventanaControl {
 
         private configuracion: IVentana;
 
+        public get id(): string {
+            return this.configuracion.id;
+        }
         constructor(configuracion: IVentana) {
             this.configuracion = configuracion;
 
- if (configuracion.modal) {
-      // Crear overlay oculto inicialmente
-      this._oscurecerCon = d3.select("body")
-        .append("div")
-        .style("position", "fixed")
-        .style("top", "0")
-        .style("left", "0")
-        .style("width", "100%")
-        .style("height", "100%")
-        .style("background-color", "rgba(0,0,0,0.6)") // negro con opacidad
-        .style("z-index", "1999") // debajo del modal
-        .style("display", "none");
-    }
+            if (configuracion.modal) {
+                this._oscurecerCon = d3.select("body")
+                    .append("div")
+                    .style("position", "fixed")
+                    .style("top", "0")
+                    .style("left", "0")
+                    .style("width", "100%")
+                    .style("height", "100%")
+                    .style("background-color", "rgba(0,0,0,0.6)")  
+                    .style("z-index", "1999")  
+                    .style("display", "none");
+            }
 
             this._contenedor = d3.select("body")
                 .append("div")
@@ -66,8 +68,6 @@ namespace ventanaControl {
 
             botonCerrar.append("image")
                 .attr("href", "images/icono_cerrar.svg")
-               
-              
                 .attr("width", 30)
                 .attr("height", 30)
                 .on("click", () => {
@@ -83,12 +83,12 @@ namespace ventanaControl {
             this._contenedor.style("display", "block");
             if (this.configuracion.modal && this._oscurecerCon) {
                 this._oscurecerCon.style("display", "block");
-            } 
+            }
         }
 
         public ocultar(): void {
             this._contenedor.style("display", "none");
-            if(this.configuracion.modal && this,this._oscurecerCon){
+            if (this.configuracion.modal && this, this._oscurecerCon) {
                 this._oscurecerCon.style("display", "none");
             }
         }
@@ -99,13 +99,4 @@ namespace ventanaControl {
     }
 }
 
-
-
-
-
-//  private _conten: d3.Selection<
-//             HTMLDivElement,//GElement, tipo del elemento seleccionado (ej. HTMLDivElement)
-//             unknown, //Datum, tipo de los datos asociados (unknown si no se sabe)
-//             HTMLElement, //PElement, tipo del padre de ese elemento (ej. HTMLElement)
-//             any>;//PDatum, tipo de los datos del padre (any si no importa)
-//         private _ventanaModal: ventanaControl.ventanaControl;
+ 
