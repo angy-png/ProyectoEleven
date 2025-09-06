@@ -9,7 +9,6 @@ namespace app {
         }
 
       private async inicializar() {
-    // 1️⃣ Crear botones primero
     d3.select("body")
         .append("button")
         .text("Circulos")
@@ -30,17 +29,13 @@ namespace app {
             this._user.abrirPantalla();
             if (this._circ) this._circ.cerrarPantallaCirculos();
             if (this._emp) this._emp.cerrarPantalla(); 
-            
-             
         });
 
     d3.select("body")
         .append("button")
         .text("Empresas")
         .on("click", () => {
-           if(!this._emp) this._emp = new empresas.ControladorEmpresas(); 
-            
-            
+           if(!this._emp) this._emp = new empresas.ControladorEmpresas();  
             this._emp.abrirPantalla(); 
             if (this._user) this._user.cerrarPantalla();
             if (this._circ) this._circ.cerrarPantallaCirculos();
@@ -51,10 +46,6 @@ namespace app {
         .style("margin", "10px")
         .style("padding", "10px 20px")
         .style("cursor", "pointer");
-
- 
- 
-
     }  }
 
     let _main: app.main = new app.main();

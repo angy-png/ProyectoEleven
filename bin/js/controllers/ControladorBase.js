@@ -58,18 +58,18 @@ var controladorBase;
             const valorB = b[propiedad];
             if (typeof valorA === "string" && typeof valorB === "string") {
                 if (asc) {
-                    return valorA.localeCompare(valorB); // ascendente
+                    return valorA.localeCompare(valorB);
                 }
                 else {
-                    return valorB.localeCompare(valorA); // descendente
+                    return valorB.localeCompare(valorA);
                 }
             }
             if (typeof valorA === "number" && typeof valorB === "number") {
                 if (asc) {
-                    return valorA - valorB; // ascendente
+                    return valorA - valorB;
                 }
                 else {
-                    return valorB - valorA; // descendente
+                    return valorB - valorA;
                 }
             }
             if (typeof valorA === "boolean" && typeof valorB === "boolean") {

@@ -5,7 +5,6 @@ namespace empresas {
         private _ventanaModal: ventanaControl.ventanaControl;
         private _ventanaConfirmacion: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
-
         private empresasCache: I_empresas[] = [];
 
         private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");

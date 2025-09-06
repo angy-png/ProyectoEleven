@@ -25,5 +25,10 @@ namespace usuarios {
             });
             this.vista.renderTabla(filtrados);
         }
+public setEmpresas(empresas: empresas.I_empresas[]) {
+    this.vista.empresas = empresas;
+}
+
+        
     }
 }

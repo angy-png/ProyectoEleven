@@ -1,5 +1,4 @@
 namespace controladorBase{
-    // ---------------- Interfaces y Base ----------------
 export interface IVista<T> {
     onAgregarEditar?: (modo: "agregar" | "editar", datos?: T) => void;
     onEliminar?: (item: T) => void;
@@ -89,17 +88,17 @@ export abstract class controladorBase<T, V extends IVista<T>> {
 
             if (typeof valorA === "string" && typeof valorB === "string") {
                 if (asc) {
-                    return valorA.localeCompare(valorB); // ascendente
+                    return valorA.localeCompare(valorB); 
                 } else {
-                    return valorB.localeCompare(valorA); // descendente
+                    return valorB.localeCompare(valorA); 
                 }
             }
 
             if (typeof valorA === "number" && typeof valorB === "number") {
                 if (asc) {
-                    return valorA - valorB; // ascendente
+                    return valorA - valorB;  
                 } else {
-                    return valorB - valorA; // descendente
+                    return valorB - valorA;  
                 }
             }
 

@@ -18,7 +18,6 @@ var app;
         }
         inicializar() {
             return __awaiter(this, void 0, void 0, function* () {
-                // 1️⃣ Crear botones primero
                 d3.select("body")
                     .append("button")
                     .text("Circulos")

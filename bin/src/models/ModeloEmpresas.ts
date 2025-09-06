@@ -15,12 +15,12 @@ namespace empresas {
 
         public cargarDesdeJson(data: any[]): void {
             super.cargarDesdeJson(data, (item) => ({
-                id: item.id ? Number(item.id) : 0,
-                nombre: item.nombre ?? "",
-                rfc: item.rfc ?? "",
-                telefono: item.telefono ? Number(item.telefono) : 0,
-                activo: item.activo === true || item.activo === "true",
-                fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
+                id: item.id !== undefined && item.id !== null? Number(item.id) : 0,
+                nombre: item.nombre? String(item.nombre) : "",
+                rfc: item.rfc? String(item.rfc) : "",
+                telefono: item.telefono ! == undefined && item.telefono !== null? Number(item.telefono): 0,
+                activo: item.activo !== undefined && item.activo !== null? item.activo == true || item.activo === "true": false,
+                fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro): new Date()
             }));
         }
     }

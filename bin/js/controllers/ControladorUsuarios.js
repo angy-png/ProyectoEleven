@@ -22,6 +22,9 @@ var usuarios;
             });
             this.vista.renderTabla(filtrados);
         }
+        setEmpresas(empresas) {
+            this.vista.empresas = empresas;
+        }
     }
     usuarios.ControladorUsuarios = ControladorUsuarios;
 })(usuarios || (usuarios = {}));

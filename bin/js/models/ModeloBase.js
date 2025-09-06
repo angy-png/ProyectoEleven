@@ -31,45 +31,5 @@ var base;
         }
     }
     base.ModeloBase = ModeloBase;
-    function ordenar(array, propiedad, asc = true) {
-        return array.sort((a, b) => {
-            const valorA = a[propiedad];
-            const valorB = b[propiedad];
-            if (typeof valorA === "string" && typeof valorB === "string") {
-                if (asc) {
-                    return valorA.localeCompare(valorB); // ascendente
-                }
-                else {
-                    return valorB.localeCompare(valorA); // descendente
-                }
-            }
-            if (typeof valorA === "number" && typeof valorB === "number") {
-                if (asc) {
-                    return valorA - valorB; // ascendente
-                }
-                else {
-                    return valorB - valorA; // descendente
-                }
-            }
-            if (typeof valorA === "boolean" && typeof valorB === "boolean") {
-                if (asc) {
-                    return Number(valorA) - Number(valorB);
-                }
-                else {
-                    return Number(valorB) - Number(valorA);
-                }
-            }
-            if (valorA instanceof Date && valorB instanceof Date) {
-                if (asc) {
-                    return valorA.getTime() - valorB.getTime();
-                }
-                else {
-                    return valorB.getTime() - valorA.getTime();
-                }
-            }
-            return 0;
-        });
-    }
-    base.ordenar = ordenar;
 })(base || (base = {}));
 //# sourceMappingURL=ModeloBase.js.map

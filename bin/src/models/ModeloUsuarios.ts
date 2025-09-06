@@ -17,14 +17,14 @@ namespace usuarios {
 
         public cargarDesdeJson(data: any[]): void {
             super.cargarDesdeJson(data, (item) => ({
-                id: item.id ? Number(item.id) : 0,
-                nombre: item.nombre ?? "",
-                apellidoPaterno: item.apellidoPaterno ?? "",
-                apellidoMaterno: item.apellidoMaterno ?? "",
-                usuario: item.usuario ?? "",
-                id_empresa: item.id_empresa ? Number(item.id_empresa) : 0,
-                correo: item.correo ?? "",
-                telefono: item.telefono ? Number(item.telefono) : 0,
+                id: item.id !== undefined && item.id !== null ? Number(item.id):0,
+                nombre: item.nombre ? String(item.nombre): "",
+                apellidoPaterno: item.apellidoPaterno? String(item.apellidoPaterno): "",
+                apellidoMaterno: item.apellidoMaterno? String(item.apellidoMaterno): "",
+                usuario: item.usuario ? String(item.usuario) :"",
+                id_empresa: item.id_empresa !== undefined && item.id_empresa !== null? Number(item.id_empresa): 0, 
+                correo: item.correo ?String(item.correo): "",
+                telefono: item.telefono !== undefined && item.telefono !== null? Number(item.telefono): 0
             }));
         }
 
