@@ -19,21 +19,34 @@ var usuarios;
             this.crearModal();
             this.crearModalConfirmacion();
         }
+        actualizarSelectEmpresas(empresas) {
+            this._selectEmpresas.selectAll("option").remove(); // limpiar
+            // opción "todas"
+            this._selectEmpresas.append("option")
+                .attr("value", "0")
+                .text("Todas las empresas");
+            this._selectEmpresas.selectAll("option.empresa")
+                .data(empresas, d => d.id)
+                .join(enter => enter.append("option")
+                .attr("class", "empresa")
+                .attr("value", d => String(d.id))
+                .text(d => d.nombre));
+        }
         crearControles() {
             const contenedorInput = this._conten.append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
-            const select = contenedorInput.append("select").attr("id", "select-empresa");
+            this._selectEmpresas = contenedorInput.append("select").attr("id", "select-empresa");
             const inputTexto = contenedorInput.append("input")
                 .attr("type", "text")
                 .attr("placeholder", "Filtrar por nombre");
             const aplicarFiltro = () => {
                 var _a;
                 const textoBusqueda = inputTexto.property("value") || "";
-                const valorEmpresa = Number(select.property("value") || 0);
+                const valorEmpresa = Number(this._selectEmpresas.property("value") || 0);
                 (_a = this.onFiltrar) === null || _a === void 0 ? void 0 : _a.call(this, textoBusqueda, valorEmpresa);
             };
-            select.on("change", aplicarFiltro);
+            this._selectEmpresas.on("change", aplicarFiltro);
             inputTexto.on("input", aplicarFiltro);
             contenedorInput.append("img")
                 .attr("src", "images/nuevo.svg")
@@ -98,7 +111,6 @@ var usuarios;
                     .style("font-size", "10px")
                     .style("color", "gray")
                     .text("▼");
-                // Asignamos eventos usando for y closures
                 asc.on("click", () => {
                     var _a;
                     (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, columna.campo, true);
@@ -137,6 +149,7 @@ var usuarios;
         }
         actualizarEmpresas(nuevasEmpresas, usuarios) {
             this.empresas = nuevasEmpresas; // actualiza la lista interna de empresas
+            this.actualizarSelectEmpresas(nuevasEmpresas);
             this.renderTabla(usuarios); // refresca la tabla de usuarios con nombres de empresa actualizados
         }
         renderTabla(data) {
@@ -214,30 +227,61 @@ var usuarios;
             });
         }
         mostrarModal(datos, guardarCb) {
+            var _a;
             const modal = this._ventanaModal._contenido;
             this._ventanaModal.limpiarContenido();
             modal.append("h3").text(datos ? "Editar" : "Agregar");
+            // Campos del usuario
             const campos = ["nombre", "apellidoPaterno", "apellidoMaterno", "usuario", "correo", "telefono", "id_empresa"];
-            campos.forEach(campo => {
-                var _a;
+            for (let i = 0; i < campos.length; i++) {
+                const campo = campos[i];
                 modal.append("p").text(campo);
-                modal.append("input")
-                    .attr("id", campo)
-                    .style("margin-bottom", "10px")
-                    .style("display", "block")
-                    .property("value", (_a = datos === null || datos === void 0 ? void 0 : datos[campo]) !== null && _a !== void 0 ? _a : "");
-            });
+                if (campo === "id_empresa") {
+                    // Crear select para empresas
+                    const select = modal.append("select").attr("id", campo).style("display", "block").style("margin-bottom", "10px");
+                    // Llenar opciones con empresas
+                    this.empresas.forEach(e => {
+                        select.append("option")
+                            .attr("value", e.id)
+                            .text(e.nombre);
+                    });
+                    // Seleccionar empresa actual si es edición
+                    if (datos)
+                        select.property("value", datos.id_empresa);
+                }
+                else {
+                    // Input normal
+                    modal.append("input")
+                        .attr("id", campo)
+                        .style("margin-bottom", "10px")
+                        .style("display", "block")
+                        .property("value", (_a = datos === null || datos === void 0 ? void 0 : datos[campo]) !== null && _a !== void 0 ? _a : "");
+                }
+            }
+            // Botón Guardar
             modal.append("button")
                 .text("Guardar")
                 .on("click", () => {
                 const nuevoUsuario = {};
-                campos.forEach(campo => {
-                    const input = document.getElementById(campo);
-                    let valor = input.value;
-                    if (campo === "telefono" || campo === "id_empresa")
-                        valor = Number(valor);
+                for (let i = 0; i < campos.length; i++) {
+                    const campo = campos[i];
+                    let valor;
+                    if (campo === "id_empresa") {
+                        // Tomar valor del select
+                        const select = document.getElementById(campo);
+                        valor = Number(select.value);
+                    }
+                    else if (campo === "telefono") {
+                        const input = document.getElementById(campo);
+                        valor = Number(input.value);
+                    }
+                    else {
+                        const input = document.getElementById(campo);
+                        valor = input.value;
+                    }
                     nuevoUsuario[campo] = valor;
-                });
+                }
+                console.log("Datos editados por el usuario:", nuevoUsuario);
                 guardarCb === null || guardarCb === void 0 ? void 0 : guardarCb(nuevoUsuario);
                 this._ventanaModal.ocultar();
             });

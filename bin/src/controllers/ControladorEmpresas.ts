@@ -1,6 +1,6 @@
 namespace empresas {
-    export class ControladorEmpresas
-        extends controladorBase.controladorBase<I_empresas, VistaEmpresas> {
+    export class ControladorEmpresas 
+    extends controladorBase.controladorBase<I_empresas, VistaEmpresas> {
 
         // Callback opcional cuando los datos ya se cargaron
         public onDatosCargados?: (empresas: I_empresas[]) => void;
@@ -13,6 +13,7 @@ namespace empresas {
             super(modelo, vista);
 
             this.vista.onFiltrar = (texto) => this.filtrar(texto);
+            
             this.vista.onOrdenar = (campo, asc) => {
                 const datosOrdenados = controladorBase.ordenar(this.modelo.obtenerTodos(), campo, asc);
                 this.vista.renderTabla(datosOrdenados);

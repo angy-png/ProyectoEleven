@@ -18,7 +18,6 @@ namespace usuarios {
 
         private filtrar(nombre: string, idEmpresa: number): void {
             const filtrados = this.modelo.obtenerTodos().filter(u => {
-                const nombreEmpresa = this.vista.empresas.find(e => e.id === u.id_empresa)?.nombre || "";
                 const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
                 const coincideEmpresa = !idEmpresa || u.id_empresa === idEmpresa;
                 return coincideNombre && coincideEmpresa;
@@ -26,8 +25,8 @@ namespace usuarios {
             this.vista.renderTabla(filtrados);
         }
 
-
-        public setEmpresas(empresas: empresas.I_empresas[]) {
+        // recibe empresas, y ordena a la vista sincronizar el UI de usuarios con ese nuevo catálogo 
+        public setEmpresas(empresas: empresas.I_empresas[]) { //recibe empresas 
             console.log("Usuarios recibió empresas:", empresas);
             this.vista.actualizarEmpresas(empresas, this.modelo.obtenerTodos());
         }

@@ -4,7 +4,10 @@ namespace usuarios {
         private _ventanaModal: ventanaControl.ventanaControl;
         private _ventanaConfirmacion: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
+        private _selectEmpresas!: d3.Selection<HTMLSelectElement, unknown, HTMLElement, any>;
+
         public empresas: empresas.I_empresas[] = [];
+
         public onAgregarEditar?: (modo: "agregar" | "editar", datos?: I_Usuarios) => void;
         public onEliminar?: (usuario: I_Usuarios) => void;
         public onOrdenar?: (campo: keyof I_Usuarios, asc: boolean) => void;
@@ -29,24 +32,41 @@ namespace usuarios {
             this.crearModal();
             this.crearModalConfirmacion();
         }
+        public actualizarSelectEmpresas(empresas: empresas.I_empresas[]) {
+            this._selectEmpresas.selectAll("option").remove(); // limpiar
+            // opción "todas"
+            this._selectEmpresas.append("option")
+                .attr("value", "0")
+                .text("Todas las empresas");
 
+            this._selectEmpresas.selectAll<HTMLOptionElement, empresas.I_empresas>("option.empresa")
+                .data(empresas, d => d.id)
+                .join(
+                    enter => enter.append("option")
+                        .attr("class", "empresa")
+                        .attr("value", d => String(d.id))
+                        .text(d => d.nombre)
+                );
+        }
+        
         private crearControles(): void {
             const contenedorInput = this._conten.append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
 
-            const select = contenedorInput.append("select").attr("id", "select-empresa");
+            this._selectEmpresas = contenedorInput.append("select").attr("id", "select-empresa");
+
             const inputTexto = contenedorInput.append("input")
                 .attr("type", "text")
                 .attr("placeholder", "Filtrar por nombre");
 
             const aplicarFiltro = () => {
                 const textoBusqueda = inputTexto.property("value") || "";
-                const valorEmpresa = Number(select.property("value") || 0);
+                const valorEmpresa = Number(this._selectEmpresas.property("value") || 0);
                 this.onFiltrar?.(textoBusqueda, valorEmpresa);
             };
 
-            select.on("change", aplicarFiltro);
+            this._selectEmpresas.on("change", aplicarFiltro);
             inputTexto.on("input", aplicarFiltro);
 
             contenedorInput.append("img")
@@ -58,110 +78,110 @@ namespace usuarios {
                 .on("click", () => this.onAgregarEditar?.("agregar"));
         }
 
-    private crearTabla(): void {
-    const tabla = this._conten.append("table")
-        .attr("id", "tabla-usuarios")
-        .style("width", "100%")
-        .style("border-collapse", "collapse")
-        .style("margin-top", "20px");
+        private crearTabla(): void {
+            const tabla = this._conten.append("table")
+                .attr("id", "tabla-usuarios")
+                .style("width", "100%")
+                .style("border-collapse", "collapse")
+                .style("margin-top", "20px");
 
-    const columnas: I_columna[] = [
-        { titulo: 'Acciones', campo: null },
-        { titulo: 'Nombre', campo: 'nombre' },
-        { titulo: 'Apellido paterno', campo: 'apellidoPaterno' },
-        { titulo: 'Apellido materno', campo: 'apellidoMaterno' },
-        { titulo: 'Usuario', campo: 'usuario' },
-        { titulo: 'Correo', campo: 'correo' },
-        { titulo: 'Teléfono', campo: 'telefono' },
-        { titulo: 'Empresa', campo: 'id_empresa' }
-    ];
+            const columnas: I_columna[] = [
+                { titulo: 'Acciones', campo: null },
+                { titulo: 'Nombre', campo: 'nombre' },
+                { titulo: 'Apellido paterno', campo: 'apellidoPaterno' },
+                { titulo: 'Apellido materno', campo: 'apellidoMaterno' },
+                { titulo: 'Usuario', campo: 'usuario' },
+                { titulo: 'Correo', campo: 'correo' },
+                { titulo: 'Teléfono', campo: 'telefono' },
+                { titulo: 'Empresa', campo: 'id_empresa' }
+            ];
 
-    let columnaActiva: keyof I_Usuarios | null = null;
-    let direccionActiva: 'asc' | 'desc' | null = null;
+            let columnaActiva: keyof I_Usuarios | null = null;
+            let direccionActiva: 'asc' | 'desc' | null = null;
 
-    const thead = tabla.append("thead");
-    const trHead = thead.append("tr");
+            const thead = tabla.append("thead");
+            const trHead = thead.append("tr");
 
-    const ths = trHead.selectAll("th")
-        .data(columnas)
-        .enter()
-        .append("th")
-        .style("border", "1px solid black")
-        .style("background-color", "#bde9c4ff")
-        .style("padding", "4px");
+            const ths = trHead.selectAll("th")
+                .data(columnas)
+                .enter()
+                .append("th")
+                .style("border", "1px solid black")
+                .style("background-color", "#bde9c4ff")
+                .style("padding", "4px");
 
-    // Recorremos los th generados con for
-    const thNodes = ths.nodes();
-    for (let i = 0; i < columnas.length; i++) {
-        const columna = columnas[i];
-        const th = d3.select(thNodes[i]);
+            // Recorremos los th generados con for
+            const thNodes = ths.nodes();
+            for (let i = 0; i < columnas.length; i++) {
+                const columna = columnas[i];
+                const th = d3.select(thNodes[i]);
 
-        if (!columna.campo) {
-            th.text(columna.titulo);
-            continue;
-        }
+                if (!columna.campo) {
+                    th.text(columna.titulo);
+                    continue;
+                }
 
-        const cont = th.append("div")
-            .style("display", "flex")
-            .style("justify-content", "space-between");
-        cont.append("span").text(columna.titulo);
+                const cont = th.append("div")
+                    .style("display", "flex")
+                    .style("justify-content", "space-between");
+                cont.append("span").text(columna.titulo);
 
-        const flechas = cont.append("span")
-            .style("display", "flex")
-            .style("flex-direction", "column");
-        const asc = flechas.append("span")
-            .attr("class", "flecha-asc")
-            .style("cursor", "pointer")
-            .style("font-size", "10px")
-            .style("color", "gray")
-            .text("▲");
+                const flechas = cont.append("span")
+                    .style("display", "flex")
+                    .style("flex-direction", "column");
+                const asc = flechas.append("span")
+                    .attr("class", "flecha-asc")
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▲");
 
-        const desc = flechas.append("span")
-            .attr("class", "flecha-desc")
-            .style("cursor", "pointer")
-            .style("font-size", "10px")
-            .style("color", "gray")
-            .text("▼");
+                const desc = flechas.append("span")
+                    .attr("class", "flecha-desc")
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▼");
 
-        // Asignamos eventos usando for y closures
-        asc.on("click", () => {
-            this.onOrdenar?.(columna.campo!, true);
-            columnaActiva = columna.campo!;
-            direccionActiva = 'asc';
-            actualizarFlechas();
-        });
+                asc.on("click", () => {
+                    this.onOrdenar?.(columna.campo!, true);
+                    columnaActiva = columna.campo!;
+                    direccionActiva = 'asc';
+                    actualizarFlechas();
+                });
 
-        desc.on("click", () => {
-            this.onOrdenar?.(columna.campo!, false);
-            columnaActiva = columna.campo!;
-            direccionActiva = 'desc';
-            actualizarFlechas();
-        });
-    }
-
-    tabla.append("tbody").attr("id", "tabla-usuario-body");
-
-    const actualizarFlechas = () => {
-        const thsActual = trHead.selectAll("th").nodes();
-        for (let i = 0; i < columnas.length; i++) {
-            const columna = columnas[i];
-            if (!columna.campo) continue;
-            const th = d3.select(thsActual[i]);
-            const asc = th.select(".flecha-asc");
-            const desc = th.select(".flecha-desc");
-            if (columna.campo === columnaActiva) {
-                asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
-                desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
-            } else {
-                asc.style("color", "gray");
-                desc.style("color", "gray");
+                desc.on("click", () => {
+                    this.onOrdenar?.(columna.campo!, false);
+                    columnaActiva = columna.campo!;
+                    direccionActiva = 'desc';
+                    actualizarFlechas();
+                });
             }
+
+            tabla.append("tbody").attr("id", "tabla-usuario-body");
+
+            const actualizarFlechas = () => {
+                const thsActual = trHead.selectAll("th").nodes();
+                for (let i = 0; i < columnas.length; i++) {
+                    const columna = columnas[i];
+                    if (!columna.campo) continue;
+                    const th = d3.select(thsActual[i]);
+                    const asc = th.select(".flecha-asc");
+                    const desc = th.select(".flecha-desc");
+                    if (columna.campo === columnaActiva) {
+                        asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
+                        desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
+                    } else {
+                        asc.style("color", "gray");
+                        desc.style("color", "gray");
+                    }
+                }
+            };
         }
-    };
-}
 
         public actualizarEmpresas(nuevasEmpresas: empresas.I_empresas[], usuarios: I_Usuarios[]) {
             this.empresas = nuevasEmpresas;   // actualiza la lista interna de empresas
+            this.actualizarSelectEmpresas(nuevasEmpresas);
             this.renderTabla(usuarios);       // refresca la tabla de usuarios con nombres de empresa actualizados
         }
 
@@ -258,32 +278,71 @@ namespace usuarios {
             this._ventanaModal.limpiarContenido();
             modal.append("h3").text(datos ? "Editar" : "Agregar");
 
+            // Campos del usuario
             const campos = ["nombre", "apellidoPaterno", "apellidoMaterno", "usuario", "correo", "telefono", "id_empresa"];
-            campos.forEach(campo => {
-                modal.append("p").text(campo);
-                modal.append("input")
-                    .attr("id", campo)
-                    .style("margin-bottom", "10px")
-                    .style("display", "block")
-                    .property("value", datos?.[campo as keyof I_Usuarios] ?? "");
-            });
 
+            for (let i = 0; i < campos.length; i++) {
+                const campo = campos[i];
+                modal.append("p").text(campo);
+
+                if (campo === "id_empresa") {
+                    // Crear select para empresas
+                    const select = modal.append("select").attr("id", campo).style("display", "block").style("margin-bottom", "10px");
+
+                    // Llenar opciones con empresas
+                    this.empresas.forEach(e => {
+                        select.append("option")
+                            .attr("value", e.id)
+                            .text(e.nombre);
+                    });
+
+                    // Seleccionar empresa actual si es edición
+                    if (datos) select.property("value", datos.id_empresa);
+
+                } else {
+                    // Input normal
+                    modal.append("input")
+                        .attr("id", campo)
+                        .style("margin-bottom", "10px")
+                        .style("display", "block")
+                        .property("value", datos?.[campo as keyof I_Usuarios] ?? "");
+                }
+            }
+
+            // Botón Guardar
             modal.append("button")
                 .text("Guardar")
                 .on("click", () => {
                     const nuevoUsuario: Partial<I_Usuarios> = {};
-                    campos.forEach(campo => {
-                        const input = document.getElementById(campo) as HTMLInputElement;
-                        let valor: any = input.value;
-                        if (campo === "telefono" || campo === "id_empresa") valor = Number(valor);
+
+                    for (let i = 0; i < campos.length; i++) {
+                        const campo = campos[i];
+                        let valor: any;
+
+                        if (campo === "id_empresa") {
+                            // Tomar valor del select
+                            const select = document.getElementById(campo) as HTMLSelectElement;
+                            valor = Number(select.value);
+                        } else if (campo === "telefono") {
+                            const input = document.getElementById(campo) as HTMLInputElement;
+                            valor = Number(input.value);
+                        } else {
+                            const input = document.getElementById(campo) as HTMLInputElement;
+                            valor = input.value;
+                        }
+
                         nuevoUsuario[campo as keyof I_Usuarios] = valor as never;
-                    });
+                    }
+
+                    console.log("Datos editados por el usuario:", nuevoUsuario);
+
                     guardarCb?.(nuevoUsuario);
                     this._ventanaModal.ocultar();
                 });
 
             this._ventanaModal.mostrar();
         }
+
 
         public mostrarConfirmacion(mensaje: string, confirmarCb: () => void): void {
             const modal = this._ventanaConfirmacion._contenido;

@@ -5,14 +5,15 @@ namespace empresas {
         private _ventanaModal: ventanaControl.ventanaControl;
         private _ventanaConfirmacion: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
-        private empresasCache: I_empresas[] = [];
 
-        private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
-        private formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
         public onOrdenar?: (campo: keyof I_empresas, asc: boolean) => void;
         public onAgregarEditar?: (modo: "agregar" | "editar", datos?: I_empresas) => void;
         public onEliminar?: (empresa: I_empresas) => void;
         public onFiltrar?: (texto: string) => void;
+
+        // Formato de fechas 
+        private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
+        private formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
 
         constructor() {
             this._ventana = new ventanaControl.ventanaControl({
@@ -47,7 +48,7 @@ namespace empresas {
                 this.onFiltrar?.(textoBusqueda);
             };
             inputTexto.on("input", aplicarFiltro);
-            
+
             cont.append("img")
                 .attr("src", "images/nuevo.svg")
                 .attr("width", 30)
@@ -58,7 +59,7 @@ namespace empresas {
         }
 
         public renderTabla(data: I_empresas[]): void {
-            this.empresasCache = data;
+
             const tbody = d3.select("#tabla-empresas-body");
             const columnas = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
 
@@ -116,116 +117,115 @@ namespace empresas {
                 );
         }
 
-       private crearTabla(): void {
-    const tabla = this._conten.append("table")
-        .attr("id", "tabla-empresas")
-        .style("width", "100%")
-        .style("border-collapse", "collapse")
-        .style("margin-top", "20px");
+        private crearTabla(): void {
+            const tabla = this._conten.append("table")
+                .attr("id", "tabla-empresas")
+                .style("width", "100%")
+                .style("border-collapse", "collapse")
+                .style("margin-top", "20px");
 
-    const columnas: I_columna[] = [
-        { titulo: 'Acciones', campo: null },
-        { titulo: 'Nombre', campo: 'nombre' },
-        { titulo: 'Rfc', campo: 'rfc' },
-        { titulo: 'Telefono', campo: 'telefono' },
-        { titulo: 'Activo', campo: 'activo' },
-        { titulo: 'Fecha registro', campo: 'fechaRegistro' }
-    ];
+            const columnas: I_columna[] = [
+                { titulo: 'Acciones', campo: null },
+                { titulo: 'Nombre', campo: 'nombre' },
+                { titulo: 'Rfc', campo: 'rfc' },
+                { titulo: 'Telefono', campo: 'telefono' },
+                { titulo: 'Activo', campo: 'activo' },
+                { titulo: 'Fecha registro', campo: 'fechaRegistro' }
+            ];
 
-    let columnaActiva: keyof I_empresas | null = null;
-    let direccionActiva: 'asc' | 'desc' | null = null;
+            let columnaActiva: keyof I_empresas | null = null;
+            let direccionActiva: 'asc' | 'desc' | null = null;
 
-    const thead = tabla.append("thead");
-    const trHead = thead.append("tr");
+            const thead = tabla.append("thead");
+            const trHead = thead.append("tr");
 
-    // Crear th
-    const ths = trHead.selectAll("th").data(columnas).enter().append("th")
-        .style("border", "1px solid black")
-        .style("background-color", "#bde9c4ff")
-        .style("padding", "4px");
+            // Crear th
+            const ths = trHead.selectAll("th").data(columnas).enter().append("th")
+                .style("border", "1px solid black")
+                .style("background-color", "#bde9c4ff")
+                .style("padding", "4px");
 
-    const nodes = ths.nodes(); // array de nodos
+            const nodes = ths.nodes(); // array de nodos
 
-    // Rellenar contenido de cada th
-    for (let i = 0; i < columnas.length; i++) {
-        const d = columnas[i];
-        const th = d3.select(nodes[i]);
+            // Rellenar contenido de cada th
+            for (let i = 0; i < columnas.length; i++) {
+                const d = columnas[i];
+                const th = d3.select(nodes[i]);
 
-        if (!d.campo) {
-            th.text(d.titulo);
-            continue;
-        }
+                if (!d.campo) {
+                    th.text(d.titulo);
+                    continue;
+                }
 
-        const cont = th.append("div")
-            .style("display", "flex")
-            .style("justify-content", "space-between")
-            .style("align-items", "center");
-        cont.append("span").text(d.titulo);
+                const cont = th.append("div")
+                    .style("display", "flex")
+                    .style("justify-content", "space-between")
+                    .style("align-items", "center");
+                cont.append("span").text(d.titulo);
 
-        const flechas = cont.append("span")
-            .style("display", "flex")
-            .style("flex-direction", "column")
-            .style("line-height", "8px");
+                const flechas = cont.append("span")
+                    .style("display", "flex")
+                    .style("flex-direction", "column")
+                    .style("line-height", "8px");
 
-        flechas.append("span")
-            .attr("class", "flecha-asc")
-            .style("cursor", "pointer")
-            .style("font-size", "10px")
-            .style("color", "gray")
-            .text("▲");
+                flechas.append("span")
+                    .attr("class", "flecha-asc")
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▲");
 
-        flechas.append("span")
-            .attr("class", "flecha-desc")
-            .style("cursor", "pointer")
-            .style("font-size", "10px")
-            .style("color", "gray")
-            .text("▼");
-    }
+                flechas.append("span")
+                    .attr("class", "flecha-desc")
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▼");
+            }
 
-    // Agregar eventos a flechas
-    for (let i = 0; i < columnas.length; i++) {
-        const d = columnas[i];
-        if (!d.campo) continue;
-        const th = d3.select(nodes[i]);
+            // Agregar eventos a flechas
+            for (let i = 0; i < columnas.length; i++) {
+                const d = columnas[i];
+                if (!d.campo) continue;
+                const th = d3.select(nodes[i]);
 
-        th.select(".flecha-asc").on("click", () => {
-            this.onOrdenar?.(d.campo!, true);
-            columnaActiva = d.campo!;
-            direccionActiva = 'asc';
-            actualizarFlechas();
-        });
+                th.select(".flecha-asc").on("click", () => {
+                    this.onOrdenar?.(d.campo!, true);
+                    columnaActiva = d.campo!;
+                    direccionActiva = 'asc';
+                    actualizarFlechas();
+                });
 
-        th.select(".flecha-desc").on("click", () => {
-            this.onOrdenar?.(d.campo!, false);
-            columnaActiva = d.campo!;
-            direccionActiva = 'desc';
-            actualizarFlechas();
-        });
-    }
+                th.select(".flecha-desc").on("click", () => {
+                    this.onOrdenar?.(d.campo!, false);
+                    columnaActiva = d.campo!;
+                    direccionActiva = 'desc';
+                    actualizarFlechas();
+                });
+            }
 
-    // Cuerpo de la tabla
-    tabla.append("tbody").attr("id", "tabla-empresas-body");
+            // Cuerpo de la tabla
+            tabla.append("tbody").attr("id", "tabla-empresas-body");
 
-    // Función para actualizar colores de flechas
-    const actualizarFlechas = () => {
-        for (let i = 0; i < columnas.length; i++) {
-            const d = columnas[i];
-            if (!d.campo) continue;
-            const th = d3.select(nodes[i]);
-            const asc = th.select(".flecha-asc");
-            const desc = th.select(".flecha-desc");
+            // Función para actualizar colores de flechas
+            const actualizarFlechas = () => {
+                for (let i = 0; i < columnas.length; i++) {
+                    const d = columnas[i];
+                    if (!d.campo) continue;
+                    const th = d3.select(nodes[i]);
+                    const asc = th.select(".flecha-asc");
+                    const desc = th.select(".flecha-desc");
 
-            if (d.campo === columnaActiva) {
-                asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
-                desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
-            } else {
-                asc.style("color", "gray");
-                desc.style("color", "gray");
+                    if (d.campo === columnaActiva) {
+                        asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
+                        desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
+                    } else {
+                        asc.style("color", "gray");
+                        desc.style("color", "gray");
+                    }
+                }
             }
         }
-    }
-}
-
 
         private crearModal(): void {
             this._ventanaModal = new ventanaControl.ventanaControl({
@@ -251,66 +251,65 @@ namespace empresas {
             });
         }
 
-      public mostrarModal(datos?: I_empresas, guardarCb?: (nuevaEmpresa: Partial<I_empresas>) => void): void {
-    const modal = this._ventanaModal._contenido;
-    this._ventanaModal.limpiarContenido();
+        public mostrarModal(datos?: I_empresas, guardarCb?: (nuevaEmpresa: Partial<I_empresas>) => void): void {
+            const modal = this._ventanaModal._contenido;
+            this._ventanaModal.limpiarContenido();
 
-    const modalIdPrefix = `modal-${Date.now()}`;
+            const modalIdPrefix = `modal-${Date.now()}`;
 
-    modal.append("h3").text(datos ? "Editar Empresa" : "Agregar Empresa");
+            modal.append("h3").text(datos ? "Editar Empresa" : "Agregar Empresa");
 
-    const campos: (keyof I_empresas)[] = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
-
-    for (let i = 0; i < campos.length; i++) {
-        const campo = campos[i];
-        const inputId = `${modalIdPrefix}-${campo}`;
-
-        modal.append("p").text(campo);
-
-        if (campo === "activo") {
-            const select = modal.append("select").attr("id", inputId);
-            select.append("option").attr("value", "true").text("Sí");
-            select.append("option").attr("value", "false").text("No");
-            if (datos) select.property("value", datos.activo ? "true" : "false");
-        } else if (campo === "fechaRegistro") {
-            modal.append("input")
-                .attr("id", inputId)
-                .attr("type", "datetime-local")
-                .style("display", "block")
-                .property("value", datos ? this.formatInputFecha(datos.fechaRegistro) : "");
-        } else {
-            modal.append("input")
-                .attr("id", inputId)
-                .style("display", "block")
-                .style("margin-bottom", "10px")
-                .property("value", datos ? datos[campo] : "");
-        }
-    }
-
-    modal.append("button")
-        .text("Guardar")
-        .on("click", () => {
-            const nuevaEmpresa: Partial<I_empresas> = {};
+            const campos: (keyof I_empresas)[] = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
 
             for (let i = 0; i < campos.length; i++) {
                 const campo = campos[i];
-                const input = document.getElementById(`${modalIdPrefix}-${campo}`) as HTMLInputElement;
-                let valor: any = input.value;
+                const inputId = `${modalIdPrefix}-${campo}`;
 
-                if (campo === "telefono") valor = Number(valor);
-                if (campo === "activo") valor = valor === "true";
-                if (campo === "fechaRegistro") valor = new Date(valor);
+                modal.append("p").text(campo);
 
-                nuevaEmpresa[campo] = valor as never;
+                if (campo === "activo") {
+                    const select = modal.append("select").attr("id", inputId);
+                    select.append("option").attr("value", "true").text("Sí");
+                    select.append("option").attr("value", "false").text("No");
+                    if (datos) select.property("value", datos.activo ? "true" : "false");
+                } else if (campo === "fechaRegistro") {
+                    modal.append("input")
+                        .attr("id", inputId)
+                        .attr("type", "datetime-local")
+                        .style("display", "block")
+                        .property("value", datos ? this.formatInputFecha(datos.fechaRegistro) : "");
+                } else {
+                    modal.append("input")
+                        .attr("id", inputId)
+                        .style("display", "block")
+                        .style("margin-bottom", "10px")
+                        .property("value", datos ? datos[campo] : "");
+                }
             }
 
-            console.log("Datos guardados:", nuevaEmpresa);
-            guardarCb?.(nuevaEmpresa);
-            this._ventanaModal.ocultar();
-        });
+            modal.append("button")
+                .text("Guardar")
+                .on("click", () => {
+                    const nuevaEmpresa: Partial<I_empresas> = {};
 
-    this._ventanaModal.mostrar();
-}
+                    for (let i = 0; i < campos.length; i++) {
+                        const campo = campos[i];
+                        const input = document.getElementById(`${modalIdPrefix}-${campo}`) as HTMLInputElement;
+                        let valor: any = input.value;
+
+                        if (campo === "telefono") valor = Number(valor);
+                        if (campo === "activo") valor = valor === "true";
+                        if (campo === "fechaRegistro") valor = new Date(valor);
+
+                        nuevaEmpresa[campo] = valor as never;
+                    }
+
+                    guardarCb?.(nuevaEmpresa);
+                    this._ventanaModal.ocultar();
+                });
+
+            this._ventanaModal.mostrar();
+        }
 
         public mostrarConfirmacion(mensaje: string, confirmarCb: () => void): void {
             const modal = this._ventanaConfirmacion._contenido;

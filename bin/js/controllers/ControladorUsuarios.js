@@ -14,14 +14,13 @@ var usuarios;
         }
         filtrar(nombre, idEmpresa) {
             const filtrados = this.modelo.obtenerTodos().filter(u => {
-                var _a;
-                const nombreEmpresa = ((_a = this.vista.empresas.find(e => e.id === u.id_empresa)) === null || _a === void 0 ? void 0 : _a.nombre) || "";
                 const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
                 const coincideEmpresa = !idEmpresa || u.id_empresa === idEmpresa;
                 return coincideNombre && coincideEmpresa;
             });
             this.vista.renderTabla(filtrados);
         }
+        // recibe empresas, y ordena a la vista sincronizar el UI de usuarios con ese nuevo catálogo 
         setEmpresas(empresas) {
             console.log("Usuarios recibió empresas:", empresas);
             this.vista.actualizarEmpresas(empresas, this.modelo.obtenerTodos());

@@ -2,7 +2,7 @@ var empresas;
 (function (empresas) {
     class VistaEmpresas {
         constructor() {
-            this.empresasCache = [];
+            // Formato de fechas 
             this.formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
             this.formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
             this._ventana = new ventanaControl.ventanaControl({
@@ -43,7 +43,6 @@ var empresas;
                 .on("click", () => { var _a; return (_a = this.onAgregarEditar) === null || _a === void 0 ? void 0 : _a.call(this, "agregar"); });
         }
         renderTabla(data) {
-            this.empresasCache = data;
             const tbody = d3.select("#tabla-empresas-body");
             const columnas = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
             tbody.selectAll("tr")
@@ -262,7 +261,6 @@ var empresas;
                         valor = new Date(valor);
                     nuevaEmpresa[campo] = valor;
                 }
-                console.log("Datos guardados:", nuevaEmpresa);
                 guardarCb === null || guardarCb === void 0 ? void 0 : guardarCb(nuevaEmpresa);
                 this._ventanaModal.ocultar();
             });

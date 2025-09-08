@@ -12,8 +12,8 @@ namespace usuarios {
 
     export class ModeloUsuarios extends base.ModeloBase<I_Usuarios> {
         constructor() {
-            super();
-        }
+            super(); //va llamar al constructor de la clase padre
+        } 
 
         public cargarDesdeJson(data: any[]): void {
             super.cargarDesdeJson(data, (item) => ({

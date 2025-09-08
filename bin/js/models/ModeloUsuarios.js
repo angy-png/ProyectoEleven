@@ -2,7 +2,7 @@ var usuarios;
 (function (usuarios) {
     class ModeloUsuarios extends base.ModeloBase {
         constructor() {
-            super();
+            super(); //va llamar al constructor de la clase padre
         }
         cargarDesdeJson(data) {
             super.cargarDesdeJson(data, (item) => ({

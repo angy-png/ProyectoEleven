@@ -1,5 +1,11 @@
 namespace base {
     export class ModeloBase<T extends { id: number }> {
+
+        //T = el tipo genérico de los objetos (usuarios, empresas, etc.)
+        //Partial<T> = permite actualizar solo algunos campos sin requerir todos
+        //any = datos crudos   
+        //mapper es una función de conversión que se defines para transformar ese raw en un objeto válido(T)
+
         protected items: Map<number, T> = new Map();
         public obtenerTodos(): T[] {
             return Array.from(this.items.values());
