@@ -23,7 +23,8 @@ var usuarios;
             this.vista.renderTabla(filtrados);
         }
         setEmpresas(empresas) {
-            this.vista.empresas = empresas;
+            console.log("Usuarios recibió empresas:", empresas);
+            this.vista.actualizarEmpresas(empresas, this.modelo.obtenerTodos());
         }
     }
     usuarios.ControladorUsuarios = ControladorUsuarios;

@@ -18,7 +18,7 @@ export interface IModelo<T> {
 }
 
 export abstract class controladorBase<T, V extends IVista<T>> {
-    protected modelo: IModelo<T>;
+    public modelo: IModelo<T>;
     protected vista: V;
 
     constructor(modelo: IModelo<T>, vista: V) {

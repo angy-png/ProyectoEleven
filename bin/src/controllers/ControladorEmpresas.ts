@@ -4,6 +4,8 @@ namespace empresas {
 
         // Callback opcional cuando los datos ya se cargaron
         public onDatosCargados?: (empresas: I_empresas[]) => void;
+        public onCambioEmpresas?: (listaEmpresas: empresas.I_empresas[]) => void;
+
 
         constructor() {
             const modelo = new ModeloEmpresas();
@@ -21,6 +23,13 @@ namespace empresas {
                     this.onDatosCargados(this.modelo.obtenerTodos());
                 }
             });
+        }
+
+        protected refrescarTabla(): void {
+            super.refrescarTabla(); // llama al base que renderiza la tabla
+            if (this.onCambioEmpresas) {
+                this.onCambioEmpresas(this.modelo.obtenerTodos());
+            }
         }
 
         private filtrar(nombre: string): void {

@@ -58,100 +58,113 @@ namespace usuarios {
                 .on("click", () => this.onAgregarEditar?.("agregar"));
         }
 
-        private crearTabla(): void {
-            const tabla = this._conten.append("table")
-                .attr("id", "tabla-usuarios")
-                .style("width", "100%")
-                .style("border-collapse", "collapse")
-                .style("margin-top", "20px");
+    private crearTabla(): void {
+    const tabla = this._conten.append("table")
+        .attr("id", "tabla-usuarios")
+        .style("width", "100%")
+        .style("border-collapse", "collapse")
+        .style("margin-top", "20px");
 
-            const columnas: I_columna[] = [
-                { titulo: 'Acciones', campo: null },
-                { titulo: 'Nombre', campo: 'nombre' },
-                { titulo: 'Apellido paterno', campo: 'apellidoPaterno' },
-                { titulo: 'Apellido materno', campo: 'apellidoMaterno' },
-                { titulo: 'Usuario', campo: 'usuario' },
-                { titulo: 'Correo', campo: 'correo' },
-                { titulo: 'Teléfono', campo: 'telefono' },
-                { titulo: 'Empresa', campo: 'id_empresa' }
-            ];
+    const columnas: I_columna[] = [
+        { titulo: 'Acciones', campo: null },
+        { titulo: 'Nombre', campo: 'nombre' },
+        { titulo: 'Apellido paterno', campo: 'apellidoPaterno' },
+        { titulo: 'Apellido materno', campo: 'apellidoMaterno' },
+        { titulo: 'Usuario', campo: 'usuario' },
+        { titulo: 'Correo', campo: 'correo' },
+        { titulo: 'Teléfono', campo: 'telefono' },
+        { titulo: 'Empresa', campo: 'id_empresa' }
+    ];
 
-            let columnaActiva: keyof I_Usuarios | null = null;
-            let direccionActiva: 'asc' | 'desc' | null = null;
+    let columnaActiva: keyof I_Usuarios | null = null;
+    let direccionActiva: 'asc' | 'desc' | null = null;
 
-            const thead = tabla.append("thead");
-            const trHead = thead.append("tr");
+    const thead = tabla.append("thead");
+    const trHead = thead.append("tr");
 
-            trHead.selectAll("th")
-                .data(columnas)
-                .enter()
-                .append("th")
-                .style("border", "1px solid black")
-                .style("background-color", "#bde9c4ff")
-                .style("padding", "4px")
-                .each(function (d) {
-                    const th = d3.select(this);
-                    if (!d.campo) {
-                        th.text(d.titulo);
-                        return;
-                    }
-                    const cont = th.append("div")
-                        .style("display", "flex")
-                        .style("justify-content", "space-between");
-                    cont.append("span").text(d.titulo);
-                    const flechas = cont.append("span")
-                        .style("display", "flex")
-                        .style("flex-direction", "column");
-                    flechas.append("span")
-                        .attr("class", "flecha-asc")
-                        .style("cursor", "pointer")
-                        .style("font-size", "10px")
-                        .style("color", "gray")
-                        .text("▲");
-                    flechas.append("span")
-                        .attr("class", "flecha-desc")
-                        .style("cursor", "pointer")
-                        .style("font-size", "10px")
-                        .style("color", "gray")
-                        .text("▼");
-                })
-                .each((d: I_columna, i, nodes) => {
-                    if (!d.campo) return;
-                    const th = d3.select(nodes[i]);
-                    th.select(".flecha-asc").on("click", () => {
-                        this.onOrdenar?.(d.campo!, true);   // 🔹 avisa al controlador
-                        columnaActiva = d.campo!;
-                        direccionActiva = 'asc';
-                        actualizarFlechas();
-                    });
+    const ths = trHead.selectAll("th")
+        .data(columnas)
+        .enter()
+        .append("th")
+        .style("border", "1px solid black")
+        .style("background-color", "#bde9c4ff")
+        .style("padding", "4px");
 
-                    th.select(".flecha-desc").on("click", () => {
-                        this.onOrdenar?.(d.campo!, false);  // 🔹 avisa al controlador
-                        columnaActiva = d.campo!;
-                        direccionActiva = 'desc';
-                        actualizarFlechas();
-                    });
+    // Recorremos los th generados con for
+    const thNodes = ths.nodes();
+    for (let i = 0; i < columnas.length; i++) {
+        const columna = columnas[i];
+        const th = d3.select(thNodes[i]);
 
-                });
-
-            tabla.append("tbody").attr("id", "tabla-usuario-body");
-
-            const actualizarFlechas = () => {
-                trHead.selectAll("th").each((d: I_columna, i, nodes) => {
-                    if (!d.campo) return;
-                    const th = d3.select(nodes[i]);
-                    const asc = th.select(".flecha-asc");
-                    const desc = th.select(".flecha-desc");
-                    if (d.campo === columnaActiva) {
-                        asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
-                        desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
-                    } else {
-                        asc.style("color", "gray");
-                        desc.style("color", "gray");
-                    }
-                });
-            };
+        if (!columna.campo) {
+            th.text(columna.titulo);
+            continue;
         }
+
+        const cont = th.append("div")
+            .style("display", "flex")
+            .style("justify-content", "space-between");
+        cont.append("span").text(columna.titulo);
+
+        const flechas = cont.append("span")
+            .style("display", "flex")
+            .style("flex-direction", "column");
+        const asc = flechas.append("span")
+            .attr("class", "flecha-asc")
+            .style("cursor", "pointer")
+            .style("font-size", "10px")
+            .style("color", "gray")
+            .text("▲");
+
+        const desc = flechas.append("span")
+            .attr("class", "flecha-desc")
+            .style("cursor", "pointer")
+            .style("font-size", "10px")
+            .style("color", "gray")
+            .text("▼");
+
+        // Asignamos eventos usando for y closures
+        asc.on("click", () => {
+            this.onOrdenar?.(columna.campo!, true);
+            columnaActiva = columna.campo!;
+            direccionActiva = 'asc';
+            actualizarFlechas();
+        });
+
+        desc.on("click", () => {
+            this.onOrdenar?.(columna.campo!, false);
+            columnaActiva = columna.campo!;
+            direccionActiva = 'desc';
+            actualizarFlechas();
+        });
+    }
+
+    tabla.append("tbody").attr("id", "tabla-usuario-body");
+
+    const actualizarFlechas = () => {
+        const thsActual = trHead.selectAll("th").nodes();
+        for (let i = 0; i < columnas.length; i++) {
+            const columna = columnas[i];
+            if (!columna.campo) continue;
+            const th = d3.select(thsActual[i]);
+            const asc = th.select(".flecha-asc");
+            const desc = th.select(".flecha-desc");
+            if (columna.campo === columnaActiva) {
+                asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
+                desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
+            } else {
+                asc.style("color", "gray");
+                desc.style("color", "gray");
+            }
+        }
+    };
+}
+
+        public actualizarEmpresas(nuevasEmpresas: empresas.I_empresas[], usuarios: I_Usuarios[]) {
+            this.empresas = nuevasEmpresas;   // actualiza la lista interna de empresas
+            this.renderTabla(usuarios);       // refresca la tabla de usuarios con nombres de empresa actualizados
+        }
+
 
         public renderTabla(data: I_Usuarios[]): void {
             const tbody = d3.select("#tabla-usuario-body");
@@ -179,30 +192,40 @@ namespace usuarios {
                             .style("cursor", "pointer")
                             .on("click", (event, d) => this.onEliminar?.(d));
 
-                        columnas.forEach((clave, i) => {
-                            tr.append("td")
+                        for (let i = 0; i < columnas.length; i++) {
+                            const clave = columnas[i];
+                            const td = tr.append("td")
                                 .classed(`data-col-${i}`, true)
                                 .style("border", "1px solid black")
-                                .style("padding", "6px")
-                                .text(d => {
-                                    
-                                    return (d as any)[clave] ?? "—";
-                                });
+                                .style("padding", "6px");
 
-                        });
+                            td.text(d => {
+                                if (clave === 'id_empresa') {
+                                    const empresa = this.empresas.find(e => e.id === d.id_empresa);
+                                    return empresa ? empresa.nombre : "—";
+                                }
+                                return (d as any)[clave] ?? "—";
+                            });
+                        }
+
                         return tr;
                     },
                     update => {
-                        columnas.forEach((clave, i) => {
+                        for (let i = 0; i < columnas.length; i++) {
+                            const clave = columnas[i];
                             update.select(`td.data-col-${i}`).text(d => {
-                                
+                                if (clave === 'id_empresa') {
+                                    const empresa = this.empresas.find(e => e.id === d.id_empresa);
+                                    return empresa ? empresa.nombre : "—";
+                                }
                                 return (d as any)[clave] ?? "—";
                             });
-                        });
+                        }
                         return update;
                     },
 
                     exit => exit.remove()
+
                 );
         }
 
@@ -289,6 +312,6 @@ namespace usuarios {
         public mostrar(): void { this._ventana.mostrar(); }
         public ocultar(): void { this._ventana.ocultar(); }
 
-       
+
     }
 } 

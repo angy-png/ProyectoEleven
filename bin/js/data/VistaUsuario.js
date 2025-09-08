@@ -1,5 +1,5 @@
 var usuarios;
-(function (usuarios) {
+(function (usuarios_1) {
     class VistaUsuarios {
         constructor() {
             this.empresas = [];
@@ -63,67 +63,68 @@ var usuarios;
             let direccionActiva = null;
             const thead = tabla.append("thead");
             const trHead = thead.append("tr");
-            trHead.selectAll("th")
+            const ths = trHead.selectAll("th")
                 .data(columnas)
                 .enter()
                 .append("th")
                 .style("border", "1px solid black")
                 .style("background-color", "#bde9c4ff")
-                .style("padding", "4px")
-                .each(function (d) {
-                const th = d3.select(this);
-                if (!d.campo) {
-                    th.text(d.titulo);
-                    return;
+                .style("padding", "4px");
+            // Recorremos los th generados con for
+            const thNodes = ths.nodes();
+            for (let i = 0; i < columnas.length; i++) {
+                const columna = columnas[i];
+                const th = d3.select(thNodes[i]);
+                if (!columna.campo) {
+                    th.text(columna.titulo);
+                    continue;
                 }
                 const cont = th.append("div")
                     .style("display", "flex")
                     .style("justify-content", "space-between");
-                cont.append("span").text(d.titulo);
+                cont.append("span").text(columna.titulo);
                 const flechas = cont.append("span")
                     .style("display", "flex")
                     .style("flex-direction", "column");
-                flechas.append("span")
+                const asc = flechas.append("span")
                     .attr("class", "flecha-asc")
                     .style("cursor", "pointer")
                     .style("font-size", "10px")
                     .style("color", "gray")
                     .text("▲");
-                flechas.append("span")
+                const desc = flechas.append("span")
                     .attr("class", "flecha-desc")
                     .style("cursor", "pointer")
                     .style("font-size", "10px")
                     .style("color", "gray")
                     .text("▼");
-            })
-                .each((d, i, nodes) => {
-                if (!d.campo)
-                    return;
-                const th = d3.select(nodes[i]);
-                th.select(".flecha-asc").on("click", () => {
+                // Asignamos eventos usando for y closures
+                asc.on("click", () => {
                     var _a;
-                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, true); // 🔹 avisa al controlador
-                    columnaActiva = d.campo;
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, columna.campo, true);
+                    columnaActiva = columna.campo;
                     direccionActiva = 'asc';
                     actualizarFlechas();
                 });
-                th.select(".flecha-desc").on("click", () => {
+                desc.on("click", () => {
                     var _a;
-                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, d.campo, false); // 🔹 avisa al controlador
-                    columnaActiva = d.campo;
+                    (_a = this.onOrdenar) === null || _a === void 0 ? void 0 : _a.call(this, columna.campo, false);
+                    columnaActiva = columna.campo;
                     direccionActiva = 'desc';
                     actualizarFlechas();
                 });
-            });
+            }
             tabla.append("tbody").attr("id", "tabla-usuario-body");
             const actualizarFlechas = () => {
-                trHead.selectAll("th").each((d, i, nodes) => {
-                    if (!d.campo)
-                        return;
-                    const th = d3.select(nodes[i]);
+                const thsActual = trHead.selectAll("th").nodes();
+                for (let i = 0; i < columnas.length; i++) {
+                    const columna = columnas[i];
+                    if (!columna.campo)
+                        continue;
+                    const th = d3.select(thsActual[i]);
                     const asc = th.select(".flecha-asc");
                     const desc = th.select(".flecha-desc");
-                    if (d.campo === columnaActiva) {
+                    if (columna.campo === columnaActiva) {
                         asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
                         desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
                     }
@@ -131,8 +132,12 @@ var usuarios;
                         asc.style("color", "gray");
                         desc.style("color", "gray");
                     }
-                });
+                }
             };
+        }
+        actualizarEmpresas(nuevasEmpresas, usuarios) {
+            this.empresas = nuevasEmpresas; // actualiza la lista interna de empresas
+            this.renderTabla(usuarios); // refresca la tabla de usuarios con nombres de empresa actualizados
         }
         renderTabla(data) {
             const tbody = d3.select("#tabla-usuario-body");
@@ -155,24 +160,34 @@ var usuarios;
                     .attr("height", 20)
                     .style("cursor", "pointer")
                     .on("click", (event, d) => { var _a; return (_a = this.onEliminar) === null || _a === void 0 ? void 0 : _a.call(this, d); });
-                columnas.forEach((clave, i) => {
-                    tr.append("td")
+                for (let i = 0; i < columnas.length; i++) {
+                    const clave = columnas[i];
+                    const td = tr.append("td")
                         .classed(`data-col-${i}`, true)
                         .style("border", "1px solid black")
-                        .style("padding", "6px")
-                        .text(d => {
+                        .style("padding", "6px");
+                    td.text(d => {
                         var _a;
+                        if (clave === 'id_empresa') {
+                            const empresa = this.empresas.find(e => e.id === d.id_empresa);
+                            return empresa ? empresa.nombre : "—";
+                        }
                         return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
                     });
-                });
+                }
                 return tr;
             }, update => {
-                columnas.forEach((clave, i) => {
+                for (let i = 0; i < columnas.length; i++) {
+                    const clave = columnas[i];
                     update.select(`td.data-col-${i}`).text(d => {
                         var _a;
+                        if (clave === 'id_empresa') {
+                            const empresa = this.empresas.find(e => e.id === d.id_empresa);
+                            return empresa ? empresa.nombre : "—";
+                        }
                         return (_a = d[clave]) !== null && _a !== void 0 ? _a : "—";
                     });
-                });
+                }
                 return update;
             }, exit => exit.remove());
         }
@@ -250,6 +265,6 @@ var usuarios;
         mostrar() { this._ventana.mostrar(); }
         ocultar() { this._ventana.ocultar(); }
     }
-    usuarios.VistaUsuarios = VistaUsuarios;
+    usuarios_1.VistaUsuarios = VistaUsuarios;
 })(usuarios || (usuarios = {}));
 //# sourceMappingURL=VistaUsuario.js.map

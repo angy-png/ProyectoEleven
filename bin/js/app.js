@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var app;
 (function (app) {
     class main {
@@ -14,52 +5,71 @@ var app;
             this._circ = null;
             this._user = null;
             this._emp = null;
-            this.inicializar();
+            this._contenedorBotones = d3.select("body")
+                .append("div")
+                .attr("id", "botones-arriba")
+                .style("margin-bottom", "20px");
+            this.inicializarEmpresas();
+            this.inicializarBotones();
         }
-        inicializar() {
-            return __awaiter(this, void 0, void 0, function* () {
-                d3.select("body")
-                    .append("button")
-                    .text("Circulos")
-                    .on("click", () => {
-                    if (!this._circ)
-                        this._circ = new circulos.ControladorCirculos();
-                    this._circ.abrirPantallaCirculos();
-                    if (this._user)
-                        this._user.cerrarPantalla();
-                    if (this._emp)
-                        this._emp.cerrarPantalla();
-                });
-                d3.select("body")
-                    .append("button")
-                    .text("Usuarios")
-                    .on("click", () => {
-                    if (!this._user)
-                        this._user = new usuarios.ControladorUsuarios();
-                    this._user.abrirPantalla();
-                    if (this._circ)
-                        this._circ.cerrarPantallaCirculos();
-                    if (this._emp)
-                        this._emp.cerrarPantalla();
-                });
-                d3.select("body")
-                    .append("button")
-                    .text("Empresas")
-                    .on("click", () => {
-                    if (!this._emp)
-                        this._emp = new empresas.ControladorEmpresas();
-                    this._emp.abrirPantalla();
-                    if (this._user)
-                        this._user.cerrarPantalla();
-                    if (this._circ)
-                        this._circ.cerrarPantallaCirculos();
-                });
-                d3.selectAll("button")
-                    .style("background", "#d9fab2ff")
-                    .style("margin", "10px")
-                    .style("padding", "10px 20px")
-                    .style("cursor", "pointer");
+        inicializarEmpresas() {
+            if (!this._emp) {
+                this._emp = new empresas.ControladorEmpresas();
+                this._emp.onCambioEmpresas = (listaEmpresas) => {
+                    console.log("Empresas cambiadas, actualizando usuarios");
+                    if (this._user) {
+                        this._user.setEmpresas(listaEmpresas);
+                    }
+                };
+            }
+        }
+        inicializarBotones() {
+            this._contenedorBotones
+                .append("button")
+                .text("Circulos")
+                .on("click", () => {
+                if (!this._circ)
+                    this._circ = new circulos.ControladorCirculos();
+                this._circ.abrirPantallaCirculos();
+                if (this._user)
+                    this._user.cerrarPantalla();
+                if (this._emp)
+                    this._emp.cerrarPantalla();
             });
+            this._contenedorBotones
+                .append("button")
+                .text("Usuarios")
+                .on("click", () => {
+                if (!this._user) {
+                    this._user = new usuarios.ControladorUsuarios();
+                    //Pasar empresas si ya existen
+                    if (this._emp) {
+                        this._user.setEmpresas(this._emp.modelo.obtenerTodos());
+                    }
+                }
+                this._user.abrirPantalla();
+                if (this._circ)
+                    this._circ.cerrarPantallaCirculos();
+                if (this._emp)
+                    this._emp.cerrarPantalla();
+            });
+            this._contenedorBotones
+                .append("button")
+                .text("Empresas")
+                .on("click", () => {
+                if (this._emp) {
+                    this._emp.abrirPantalla();
+                }
+                if (this._user)
+                    this._user.cerrarPantalla();
+                if (this._circ)
+                    this._circ.cerrarPantallaCirculos();
+            });
+            this._contenedorBotones.selectAll("button")
+                .style("background", "#d9fab2ff")
+                .style("margin", "10px")
+                .style("padding", "10px 20px")
+                .style("cursor", "pointer");
         }
     }
     app.main = main;

@@ -1,7 +1,7 @@
 [
   {
     "id": 1,
-    "nombre": "Tecnologías Avanzadas SA de CV",
+    "nombre": "Tecnologías",
     "rfc": "TAS010101ABC",
     "telefono": "5551234567",
     "activo": true,  
@@ -10,7 +10,7 @@
   },
   {
     "id": 2,
-    "nombre": "Constructora del Norte SA de CV",
+    "nombre": "Constructora",
     "rfc": "CNE020202XYZ",
     "telefono": "5559876543",
     "activo": false,
@@ -18,7 +18,7 @@
   },
   {
     "id": 3,
-    "nombre": "Comercializadora Global SA de CV",
+    "nombre": "Comercializadora",
     "rfc": "CGL030303DEF",
     "telefono": "5557654321",
     "activo": true,
@@ -26,7 +26,7 @@
   },
   {
     "id": 4,
-    "nombre": "Servicios Médicos Integrales SA de CV",
+    "nombre": "Servicios",
     "rfc": "SMI040404GHI",
     "telefono": "5556781234",
     "activo": true,
@@ -34,7 +34,7 @@
   },
   {
     "id": 5,
-    "nombre": "Logística Express SA de CV",
+    "nombre": "Logística",
     "rfc": "LEX050505JKL",
     "telefono": "5554321987",
     "activo": false,
@@ -42,7 +42,7 @@
   },
   {
     "id": 6,
-    "nombre": "Energías Renovables de México SA de CV",
+    "nombre": "Energías ",
     "rfc": "ERM060606MNO",
     "telefono": "5552468135",
     "activo": true,

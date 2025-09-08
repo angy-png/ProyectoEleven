@@ -25,10 +25,15 @@ namespace usuarios {
             });
             this.vista.renderTabla(filtrados);
         }
-public setEmpresas(empresas: empresas.I_empresas[]) {
-    this.vista.empresas = empresas;
-}
 
-        
+
+        public setEmpresas(empresas: empresas.I_empresas[]) {
+            console.log("Usuarios recibió empresas:", empresas);
+            this.vista.actualizarEmpresas(empresas, this.modelo.obtenerTodos());
+        }
+
+
+
+
     }
 }

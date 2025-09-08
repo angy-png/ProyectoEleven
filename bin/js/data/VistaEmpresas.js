@@ -113,23 +113,24 @@ var empresas;
             let direccionActiva = null;
             const thead = tabla.append("thead");
             const trHead = thead.append("tr");
-            trHead.selectAll("th")
-                .data(columnas)
-                .enter()
-                .append("th")
+            // Crear th
+            const ths = trHead.selectAll("th").data(columnas).enter().append("th")
                 .style("border", "1px solid black")
                 .style("background-color", "#bde9c4ff")
-                .style("padding", "4px")
-                .each(function (d) {
-                const th = d3.select(this);
+                .style("padding", "4px");
+            const nodes = ths.nodes(); // array de nodos
+            // Rellenar contenido de cada th
+            for (let i = 0; i < columnas.length; i++) {
+                const d = columnas[i];
+                const th = d3.select(nodes[i]);
                 if (!d.campo) {
                     th.text(d.titulo);
-                    return;
+                    continue;
                 }
                 const cont = th.append("div")
                     .style("display", "flex")
                     .style("justify-content", "space-between")
-                    .style("aling-items", "center");
+                    .style("align-items", "center");
                 cont.append("span").text(d.titulo);
                 const flechas = cont.append("span")
                     .style("display", "flex")
@@ -147,10 +148,12 @@ var empresas;
                     .style("font-size", "10px")
                     .style("color", "gray")
                     .text("▼");
-            })
-                .each((d, i, nodes) => {
+            }
+            // Agregar eventos a flechas
+            for (let i = 0; i < columnas.length; i++) {
+                const d = columnas[i];
                 if (!d.campo)
-                    return;
+                    continue;
                 const th = d3.select(nodes[i]);
                 th.select(".flecha-asc").on("click", () => {
                     var _a;
@@ -166,12 +169,15 @@ var empresas;
                     direccionActiva = 'desc';
                     actualizarFlechas();
                 });
-            });
+            }
+            // Cuerpo de la tabla
             tabla.append("tbody").attr("id", "tabla-empresas-body");
+            // Función para actualizar colores de flechas
             const actualizarFlechas = () => {
-                trHead.selectAll("th").each((d, i, nodes) => {
+                for (let i = 0; i < columnas.length; i++) {
+                    const d = columnas[i];
                     if (!d.campo)
-                        return;
+                        continue;
                     const th = d3.select(nodes[i]);
                     const asc = th.select(".flecha-asc");
                     const desc = th.select(".flecha-desc");
@@ -183,7 +189,7 @@ var empresas;
                         asc.style("color", "gray");
                         desc.style("color", "gray");
                     }
-                });
+                }
             };
         }
         crearModal() {
@@ -214,9 +220,9 @@ var empresas;
             const modalIdPrefix = `modal-${Date.now()}`;
             modal.append("h3").text(datos ? "Editar Empresa" : "Agregar Empresa");
             const campos = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
-            campos.forEach(campo => {
-                var _a;
-                const inputId = `${modalIdPrefix}-${campo}`; // ID único
+            for (let i = 0; i < campos.length; i++) {
+                const campo = campos[i];
+                const inputId = `${modalIdPrefix}-${campo}`;
                 modal.append("p").text(campo);
                 if (campo === "activo") {
                     const select = modal.append("select").attr("id", inputId);
@@ -237,14 +243,15 @@ var empresas;
                         .attr("id", inputId)
                         .style("display", "block")
                         .style("margin-bottom", "10px")
-                        .property("value", (_a = datos === null || datos === void 0 ? void 0 : datos[campo]) !== null && _a !== void 0 ? _a : "");
+                        .property("value", datos ? datos[campo] : "");
                 }
-            });
+            }
             modal.append("button")
                 .text("Guardar")
                 .on("click", () => {
                 const nuevaEmpresa = {};
-                campos.forEach(campo => {
+                for (let i = 0; i < campos.length; i++) {
+                    const campo = campos[i];
                     const input = document.getElementById(`${modalIdPrefix}-${campo}`);
                     let valor = input.value;
                     if (campo === "telefono")
@@ -254,7 +261,7 @@ var empresas;
                     if (campo === "fechaRegistro")
                         valor = new Date(valor);
                     nuevaEmpresa[campo] = valor;
-                });
+                }
                 console.log("Datos guardados:", nuevaEmpresa);
                 guardarCb === null || guardarCb === void 0 ? void 0 : guardarCb(nuevaEmpresa);
                 this._ventanaModal.ocultar();

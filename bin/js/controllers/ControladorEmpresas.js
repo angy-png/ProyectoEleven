@@ -16,6 +16,12 @@ var empresas;
                 }
             });
         }
+        refrescarTabla() {
+            super.refrescarTabla(); // llama al base que renderiza la tabla
+            if (this.onCambioEmpresas) {
+                this.onCambioEmpresas(this.modelo.obtenerTodos());
+            }
+        }
         filtrar(nombre) {
             const filtrados = this.modelo.obtenerTodos().filter(u => {
                 const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
