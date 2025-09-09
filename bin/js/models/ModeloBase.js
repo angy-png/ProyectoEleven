@@ -17,7 +17,9 @@ var base;
         actualizar(id, parcial) {
             const existente = this.items.get(id);
             if (existente) {
+                // una combinación de ambos objetos
                 this.items.set(id, Object.assign(Object.assign({}, existente), parcial));
+                console.log();
             }
         }
         eliminar(id) {
@@ -28,7 +30,8 @@ var base;
         }
         cargarDesdeJson(data, mapper) {
             this.items.clear();
-            for (const item of data) {
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
                 const nuevo = mapper(item);
                 this.items.set(nuevo.id, nuevo);
             }

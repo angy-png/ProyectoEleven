@@ -16,7 +16,9 @@ namespace base {
         public actualizar(id: number, parcial: Partial<T>): void {
             const existente = this.items.get(id);
             if (existente) {
+                // una combinación de ambos objetos
                 this.items.set(id, { ...existente, ...parcial });
+                console.log()
             }
         }
         public eliminar(id: number): void {
@@ -27,10 +29,12 @@ namespace base {
         }
         public cargarDesdeJson(data: any[], mapper: (raw: any) => T): void {
             this.items.clear();
-            for (const item of data) {
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
                 const nuevo = mapper(item);
                 this.items.set(nuevo.id, nuevo);
             }
+
         }
     }
 }
