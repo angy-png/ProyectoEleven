@@ -10,6 +10,11 @@ namespace base {
         public obtenerTodos(): T[] {
             return Array.from(this.items.values());
         }
+
+        public obtenerPorId(id: number): T | undefined {
+            return this.items.get(id);
+        }
+
         public agregar(item: T): void {
             this.items.set(item.id, item);
         }
@@ -18,7 +23,7 @@ namespace base {
             if (existente) {
                 // una combinación de ambos objetos
                 this.items.set(id, { ...existente, ...parcial });
-                console.log()
+
             }
         }
         public eliminar(id: number): void {

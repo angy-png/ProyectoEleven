@@ -11,30 +11,34 @@ var controladorBase;
             this.vista.onEliminar = (item) => this.eliminar(item);
         }
         abrirModal(modo, datos) {
-            this.vista.mostrarModal(datos, (nuevo) => {
+            let datosAUsar = datos;
+            // Si es edición, pide la versión actualizada al modelo
+            if (modo === "editar" && datos) {
+                const actualizado = this.modelo.obtenerPorId(datos.id);
+                if (actualizado) {
+                    datosAUsar = actualizado;
+                }
+            }
+            this.vista.mostrarModal(datosAUsar, (nuevo) => {
                 if (modo === "agregar") {
-                    // Obtener todos los elementos actuales
                     const todos = this.modelo.obtenerTodos();
                     let nuevoId;
                     if (todos.length > 0) {
-                        // Obtener el ID más alto existente y sumarle 1
                         const ids = todos.map(x => { var _a; return (_a = x.id) !== null && _a !== void 0 ? _a : 0; });
                         nuevoId = Math.max(...ids) + 1;
                     }
                     else {
-                        // Si no hay elementos, empezar desde 1
                         nuevoId = 1;
                     }
-                    // Asignar el nuevo ID al objeto que vamos a agregar
                     nuevo.id = nuevoId;
-                    // Agregar el nuevo objeto al modelo
                     this.modelo.agregar(nuevo);
                 }
-                else if (modo === "editar" && datos) {
-                    // Para edición, actualizar el objeto existente
-                    this.modelo.actualizar(datos.id, nuevo);
+                else if (modo === "editar" && datosAUsar) {
+                    this.modelo.actualizar(datosAUsar.id, nuevo);
+                    // Mostrar en consola el objeto actualizado
+                    const actualizado = this.modelo.obtenerPorId(datosAUsar.id);
+                    console.log("Objeto actualizado:", actualizado);
                 }
-                // Refrescar la tabla para reflejar los cambios
                 this.refrescarTabla();
             });
         }

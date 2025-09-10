@@ -17,7 +17,7 @@ namespace usuarios {
         constructor() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios",
-                ancho: 800,
+                ancho: 1000,
                 alto: 400,
                 colorFondo: "white",
                 titulo: "Usuarios",
@@ -48,7 +48,7 @@ namespace usuarios {
                         .text(d => d.nombre)
                 );
         }
-        
+
         private crearControles(): void {
             const contenedorInput = this._conten.append("div")
                 .style("display", "flex")
@@ -290,11 +290,12 @@ namespace usuarios {
                     const select = modal.append("select").attr("id", campo).style("display", "block").style("margin-bottom", "10px");
 
                     // Llenar opciones con empresas
-                    this.empresas.forEach(e => {
+                    for (let i = 0; i < this.empresas.length; i++) {
+                        const e = this.empresas[i];
                         select.append("option")
                             .attr("value", e.id)
                             .text(e.nombre);
-                    });
+                    }
 
                     // Seleccionar empresa actual si es edición
                     if (datos) select.property("value", datos.id_empresa);

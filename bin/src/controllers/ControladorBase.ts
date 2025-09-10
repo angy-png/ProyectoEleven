@@ -11,6 +11,7 @@ namespace controladorBase {
 
     export interface IModelo<T> {
         obtenerTodos(): T[];
+        obtenerPorId(id: number): T | undefined;
         agregar(item: T): void;
         actualizar(id: number, item: Partial<T>): void;
         eliminar(id: number): void;
@@ -31,35 +32,42 @@ namespace controladorBase {
             this.vista.onAgregarEditar = (modo: "agregar" | "editar", datos?: T) => this.abrirModal(modo, datos);
             this.vista.onEliminar = (item: T) => this.eliminar(item);
         }
+        
         protected abrirModal(modo: "agregar" | "editar", datos?: T): void {
-            this.vista.mostrarModal(datos, (nuevo: Partial<T>) => {
+            let datosAUsar = datos;
+
+            // Si es edición, pide la versión actualizada al modelo
+            if (modo === "editar" && datos) {
+                const actualizado = this.modelo.obtenerPorId((datos as any).id);
+                if (actualizado) {
+                    datosAUsar = actualizado;
+                }
+            }
+
+            this.vista.mostrarModal(datosAUsar, (nuevo: Partial<T>) => {
 
                 if (modo === "agregar") {
-                    // Obtener todos los elementos actuales
                     const todos = this.modelo.obtenerTodos();
                     let nuevoId: number;
 
                     if (todos.length > 0) {
-                        // Obtener el ID más alto existente y sumarle 1
                         const ids = todos.map(x => (x as any).id ?? 0);
                         nuevoId = Math.max(...ids) + 1;
                     } else {
-                        // Si no hay elementos, empezar desde 1
                         nuevoId = 1;
                     }
 
-                    // Asignar el nuevo ID al objeto que vamos a agregar
                     (nuevo as any).id = nuevoId;
-
-                    // Agregar el nuevo objeto al modelo
                     this.modelo.agregar(nuevo as T);
 
-                } else if (modo === "editar" && datos) {
-                    // Para edición, actualizar el objeto existente
-                    this.modelo.actualizar((datos as any).id, nuevo);
+                } else if (modo === "editar" && datosAUsar) {
+                    this.modelo.actualizar((datosAUsar as any).id, nuevo);
+
+                    // Mostrar en consola el objeto actualizado
+                    const actualizado = this.modelo.obtenerPorId((datosAUsar as any).id);
+                    console.log("Objeto actualizado:", actualizado);
                 }
 
-                // Refrescar la tabla para reflejar los cambios
                 this.refrescarTabla();
             });
         }
@@ -140,4 +148,5 @@ namespace controladorBase {
             return 0;
         });
     }
+ 
 }

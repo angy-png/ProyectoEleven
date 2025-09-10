@@ -11,6 +11,9 @@ var base;
         obtenerTodos() {
             return Array.from(this.items.values());
         }
+        obtenerPorId(id) {
+            return this.items.get(id);
+        }
         agregar(item) {
             this.items.set(item.id, item);
         }
@@ -19,7 +22,6 @@ var base;
             if (existente) {
                 // una combinación de ambos objetos
                 this.items.set(id, Object.assign(Object.assign({}, existente), parcial));
-                console.log();
             }
         }
         eliminar(id) {
