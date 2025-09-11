@@ -90,6 +90,7 @@ var controladorBase;
                     return valorB - valorA;
                 }
             }
+            // typeof determina que tipo de dato es una variable 
             if (typeof valorA === "boolean" && typeof valorB === "boolean") {
                 if (asc) {
                     return Number(valorA) - Number(valorB);
