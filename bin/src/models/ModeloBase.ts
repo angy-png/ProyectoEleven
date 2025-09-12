@@ -1,5 +1,5 @@
 namespace base {
-    export class ModeloBase<T extends { id: number }> {
+    export class  ModeloBase<T extends { id: number }> {
 
         //T = el tipo genérico de los objetos (usuarios, empresas, etc.)
         //Partial<T> = permite actualizar solo algunos campos sin requerir todos

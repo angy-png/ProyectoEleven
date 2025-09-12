@@ -245,7 +245,7 @@ namespace empresas {
                 ancho: 300,
                 alto: 150,
                 colorFondo: "#f8d7da",
-                titulo: "Confirmar Eliminación",
+                titulo: "Confirmar eliminación",
                 modal: true,
                 onClose: () => console.log("Modal empresa cerrado"),
             });

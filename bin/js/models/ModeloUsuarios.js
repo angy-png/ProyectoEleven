@@ -15,6 +15,8 @@ var usuarios;
                 correo: item.correo ? String(item.correo) : "",
                 telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
             }));
+            console.log("valor de data: " + typeof data);
+            console.log(data);
         }
     }
     usuarios.ModeloUsuarios = ModeloUsuarios;
