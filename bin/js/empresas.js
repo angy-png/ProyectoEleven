@@ -50,6 +50,7 @@ var empresas;
                             fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
                         };
                         this.empresas.set(empreNueva.id, empreNueva);
+                        console.log(empreNueva);
                     }
                 }
                 this.renderTabla(Array.from(this.empresas.values()));

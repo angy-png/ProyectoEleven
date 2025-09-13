@@ -108,7 +108,7 @@ namespace controladorBase {
             this.vista.ocultar();
         }
     }
-
+ 
     export function ordenar<T>(array: T[], propiedad: keyof T, asc: boolean = true) {
         return array.sort((a, b) => {
             const valorA = a[propiedad];

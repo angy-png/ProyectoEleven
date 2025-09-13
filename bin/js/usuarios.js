@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 var usuarios;
 (function (usuarios) {
-    class Usuariodds {
+    class Usuarios {
         constructor() {
             this.usuarios = new Map();
             this.pantPrincipal();
@@ -340,7 +340,7 @@ var usuarios;
             this._ventana.ocultar();
         }
     }
-    usuarios.Usuariodds = Usuariodds;
+    usuarios.Usuarios = Usuarios;
     // T tipo generico  
     // true por defecto es ascendente 
     function ordenar(array, propiedad, asc = true) {

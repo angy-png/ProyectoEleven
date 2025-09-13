@@ -9,19 +9,7 @@ var app;
                 .append("div")
                 .attr("id", "botones-arriba")
                 .style("margin-bottom", "20px");
-            this.inicializarEmpresas();
             this.inicializarBotones();
-        }
-        inicializarEmpresas() {
-            if (!this._emp) {
-                this._emp = new empresas.ControladorEmpresas();
-                this._emp.onCambioEmpresas = (listaEmpresas) => {
-                    console.log("Empresas cambiadas, actualizando usuarios");
-                    if (this._user) {
-                        this._user.setEmpresas(listaEmpresas);
-                    }
-                };
-            }
         }
         inicializarBotones() {
             this._contenedorBotones
@@ -29,41 +17,38 @@ var app;
                 .text("Circulos")
                 .on("click", () => {
                 if (!this._circ)
-                    this._circ = new circulos.ControladorCirculos();
+                    this._circ = new circulos.SvgCirculo();
                 this._circ.abrirPantallaCirculos();
                 if (this._user)
-                    this._user.cerrarPantalla();
+                    this._user.cerrarPantallaUsuarios();
                 if (this._emp)
-                    this._emp.cerrarPantalla();
+                    this._emp.cerrarPantallaEpresas();
             });
             this._contenedorBotones
                 .append("button")
                 .text("Usuarios")
                 .on("click", () => {
                 if (!this._user) {
-                    this._user = new usuarios.ControladorUsuarios();
-                    //Pasar empresas si ya existen
-                    if (this._emp) {
-                        this._user.setEmpresas(this._emp.modelo.obtenerTodos());
-                    }
+                    this._user = new usuarios.Usuarios();
                 }
-                this._user.abrirPantalla();
+                this._user.abrirPantallaUsuarios();
                 if (this._circ)
                     this._circ.cerrarPantallaCirculos();
                 if (this._emp)
-                    this._emp.cerrarPantalla();
+                    this._emp.cerrarPantallaEpresas();
             });
             this._contenedorBotones
                 .append("button")
                 .text("Empresas")
                 .on("click", () => {
-                if (this._emp) {
-                    this._emp.abrirPantalla();
+                if (!this._emp) {
+                    this._emp = new empresas.C_empresas();
                 }
-                if (this._user)
-                    this._user.cerrarPantalla();
+                this._emp.abrirPantallaEmpresas();
                 if (this._circ)
                     this._circ.cerrarPantallaCirculos();
+                if (this._emp)
+                    this._emp.cerrarPantallaEpresas();
             });
             this._contenedorBotones.selectAll("button")
                 .style("background", "#d9fab2ff")

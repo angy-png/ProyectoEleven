@@ -1,0 +1,51 @@
+[
+  {
+    "id": 1,
+    "nombre": "Tecnologías",
+    "rfc": "TAS010101ABC",
+    "telefono": "5551234567",
+    "activo": true,  
+    "fechaRegistro": "2025-08-20T16:00:00Z",  
+    "dia": 2
+  },
+  {
+    "id": 2,
+    "nombre": "Constructora",
+    "rfc": "CNE020202XYZ",
+    "telefono": "5559876543",
+    "activo": false,
+    "fechaRegistro": "2025-08-18T10:30:00Z" 
+  },
+  {
+    "id": 3,
+    "nombre": "Comercializadora",
+    "rfc": "CGL030303DEF",
+    "telefono": "5557654321",
+    "activo": true,
+    "fechaRegistro": "2025-07-25T09:15:00Z"
+  },
+  {
+    "id": 4,
+    "nombre": "Servicios",
+    "rfc": "SMI040404GHI",
+    "telefono": "5556781234",
+    "activo": true,
+    "fechaRegistro": "2025-08-01T12:45:00Z"
+  },
+  {
+    "id": 5,
+    "nombre": "Logística",
+    "rfc": "LEX050505JKL",
+    "telefono": "5554321987",
+    "activo": false,
+    "fechaRegistro": "2025-08-10T18:20:00Z"
+  },
+  {
+    "id": 6,
+    "nombre": "Energías ",
+    "rfc": "ERM060606MNO",
+    "telefono": "5552468135",
+    "activo": true,
+    "fechaRegistro": "2025-08-15T07:55:00Z"
+  }
+]

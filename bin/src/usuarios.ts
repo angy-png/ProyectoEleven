@@ -15,7 +15,7 @@ namespace usuarios {
         campo: keyof I_Usuarios;
     }
 
-    export class Usuariodds {
+    export class Usuarios {
         private usuarios: Map<number, I_Usuarios> = new Map();
         private _ventanaModal: ventanaControl.ventanaControl;
         private _ventana: ventanaControl.ventanaControl;
