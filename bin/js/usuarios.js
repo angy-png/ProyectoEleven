@@ -14,7 +14,7 @@ var usuarios;
             this.usuarios = new Map();
             this.empresas = empresasRef;
             this.pantPrincipal();
-            this.crearModalUsuario();
+            this.crearVentanaModalUsuario();
             this.crearControles();
             this.crearTabla();
             this.cargar();
@@ -41,7 +41,7 @@ var usuarios;
             this._ventana.ocultar();
         }
         ;
-        crearModalUsuario() {
+        crearVentanaModalUsuario() {
             this._ventanaModal = new ventanaControl.ventanaControl({
                 id: "modal-usuario",
                 ancho: 400,
@@ -53,7 +53,7 @@ var usuarios;
             });
         }
         ;
-        crearModalUsuarios() {
+        crearContenidoModalUsuario() {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
             modal.append("h3").attr("id", "titulo-modal-user");
@@ -98,7 +98,7 @@ var usuarios;
                 .text(d => d.nombre);
         }
         abrirModalUsuario(esAgregar, datosExistentesU) {
-            this.crearModalUsuarios();
+            this.crearContenidoModalUsuario();
             d3.select("#titulo-modal-user").text(esAgregar ? "Agregar usuario" : "Editar usuario");
             if (!esAgregar && datosExistentesU) {
                 document.getElementById("nombre-user").value = datosExistentesU.nombre;
@@ -110,11 +110,11 @@ var usuarios;
                 document.getElementById("id_empresa-user").value = datosExistentesU.id_empresa.toString();
             }
             document.getElementById("btn-guardar-user").onclick = () => {
-                this.gurdarUsuario(esAgregar, datosExistentesU);
+                this.guardarUsuario(esAgregar, datosExistentesU);
             };
         }
         ;
-        gurdarUsuario(esAgregar, datosExistentesU) {
+        guardarUsuario(esAgregar, datosExistentesU) {
             const userNuevo = {
                 nombre: document.getElementById("nombre-user").value,
                 apellidoPaterno: document.getElementById("apellidoP-user").value,
@@ -125,13 +125,14 @@ var usuarios;
                 id_empresa: Number(document.getElementById("id_empresa-user").value),
             };
             if (esAgregar) {
-                userNuevo.id = this.usuarios.size + 1;
+                const maxId = Math.max(0, ...Array.from(this.usuarios.keys()));
+                userNuevo.id = maxId + 1;
                 this.usuarios.set(userNuevo.id, userNuevo);
             }
             else if (datosExistentesU) {
                 this.usuarios.set(datosExistentesU.id, Object.assign(Object.assign({}, datosExistentesU), userNuevo));
             }
-            this.cargar(false);
+            this.renderTabla(Array.from(this.usuarios.values()));
             this._ventanaModal.ocultar();
         }
         ;
@@ -147,7 +148,7 @@ var usuarios;
                 .text("Sí, eliminar")
                 .on("click", () => {
                 this.usuarios.delete(usuario.id);
-                this.cargar(false);
+                this.renderTabla(Array.from(this.usuarios.values()));
                 this._ventanaModal.ocultar();
             });
             this._ventanaModal.mostrar();
@@ -289,26 +290,31 @@ var usuarios;
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
-                    const response = yield fetch("./datos.json");
-                    const data = yield response.json();
-                    this.usuarios.clear();
-                    for (let i = 0; i < data.length; i++) {
-                        const item = data[i];
-                        const userNuevo = {
-                            id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
-                            nombre: item.nombre ? String(item.nombre) : "",
-                            apellidoPaterno: item.apellidoPaterno ? String(item.apellidoPaterno) : "",
-                            apellidoMaterno: item.apellidoMaterno ? String(item.apellidoMaterno) : "",
-                            usuario: item.usuario ? String(item.usuario) : "",
-                            id_empresa: item.id_empresa !== undefined && item.id_empresa !== null ? Number(item.id_empresa) : 0,
-                            correo: item.correo ? String(item.correo) : "",
-                            telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
-                        };
-                        this.usuarios.set(userNuevo.id, userNuevo);
+                    try {
+                        const response = yield fetch("./datos.json");
+                        const data = yield response.json();
+                        this.usuarios.clear();
+                        for (let i = 0; i < data.length; i++) {
+                            const item = data[i];
+                            const userNuevo = {
+                                id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
+                                nombre: item.nombre ? String(item.nombre) : "",
+                                apellidoPaterno: item.apellidoPaterno ? String(item.apellidoPaterno) : "",
+                                apellidoMaterno: item.apellidoMaterno ? String(item.apellidoMaterno) : "",
+                                usuario: item.usuario ? String(item.usuario) : "",
+                                id_empresa: item.id_empresa !== undefined && item.id_empresa !== null ? Number(item.id_empresa) : 0,
+                                correo: item.correo ? String(item.correo) : "",
+                                telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
+                            };
+                            this.usuarios.set(userNuevo.id, userNuevo);
+                        }
                     }
+                    catch (error) {
+                        console.error("Error al cargar o parsear datos.json:", error);
+                    }
+                    this.renderTabla(Array.from(this.usuarios.values()));
+                    this.llenarSelectEmpresas();
                 }
-                this.renderTabla(Array.from(this.usuarios.values()));
-                this.llenarSelectEmpresas();
             });
         }
         ;

@@ -23,13 +23,25 @@ namespace empresas {
         private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
         private formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
 
+        private onEmpresasChange?: () => void;
+
+
         constructor() {
             this.pantPrincipal()
-            this.crearModalEmpresa();
+            this.crearVentanaModalEmpresa();
             this.crearControles();
             this.crearTabla();
             this.cargar();
         }
+
+        public setOnEmpresasChange(callback: () => void) {
+            this.onEmpresasChange = callback;
+        }
+
+        private notificarCambio() {
+            if (this.onEmpresasChange) this.onEmpresasChange();
+        }
+
 
         public pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
@@ -47,11 +59,11 @@ namespace empresas {
             this._ventana.mostrar();
         };
 
-        public cerrarPantallaEpresas(): void {
+        public cerrarPantallaEmpresas(): void {
             this._ventana.ocultar();
         };
 
-        private crearModalEmpresa(): void {
+        private crearVentanaModalEmpresa(): void {
             this._ventanaModal = new ventanaControl.ventanaControl({
                 id: "modal-empresa",
                 ancho: 400,
@@ -63,7 +75,7 @@ namespace empresas {
             });
         };
 
-        private crearModalEmpresas(): void {
+        private crearContenidoModalEmpresa(): void {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
 
@@ -95,7 +107,7 @@ namespace empresas {
         };
 
         private abrirModalEmpresa(esAgregar: boolean, datosExistentes?: I_empresas): void {
-            this.crearModalEmpresas();
+            this.crearContenidoModalEmpresa();
 
             d3.select("#titulo-modal-empre").text(esAgregar ? "Agregar empresa" : "Editar empresa");
 
@@ -122,14 +134,15 @@ namespace empresas {
             };
 
             if (esAgregar) {
-                nuevaEmpresa.id = this.empresas.size + 1;
+                const maxId = Math.max(0, ...Array.from(this.empresas.keys()));
+                nuevaEmpresa.id = maxId + 1;
                 this.empresas.set(nuevaEmpresa.id!, nuevaEmpresa as I_empresas);
             } else if (datosExistentes) {
                 this.empresas.set(datosExistentes.id, { ...datosExistentes, ...nuevaEmpresa } as I_empresas);
             }
-
-            this.cargar(false);
+            this.renderTabla(Array.from(this.empresas.values()));
             this._ventanaModal.ocultar();
+            this.notificarCambio();
         };
 
         private mostrarModalConfirmacion(empresa: I_empresas): void {
@@ -147,9 +160,9 @@ namespace empresas {
                 .text("Sí, eliminar")
                 .on("click", () => {
                     this.empresas.delete(empresa.id);
-                    console.log(this.empresas)
-                    this.cargar(false);
+                    this.renderTabla(Array.from(this.empresas.values()));
                     this._ventanaModal.ocultar();
+                    this.notificarCambio();
                 });
             this._ventanaModal.mostrar();
         };
@@ -255,7 +268,7 @@ namespace empresas {
                         actualizarFlechas();
                     });
             };
-            
+
             trHead.append("th")
                 .text("Acciones")
                 .style("border", "1px solid black")
@@ -287,30 +300,34 @@ namespace empresas {
                     flechaDesc.style("color", esColumnaActiva && direccionActiva === "desc" ? "black" : "gray");
                 }
             };
-        }; 
+        };
 
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
-                const response = await fetch("./empresas.json");
-                const data = await response.json();
-                this.empresas.clear();
+                try {
+                    const response = await fetch("./empresas.json");
+                    const data = await response.json();
+                    this.empresas.clear();
 
-                for (let i = 0; i < data.length; i++) {
-                    const item = data[i];
+                    for (let i = 0; i < data.length; i++) {
+                        const item = data[i];
 
-                    const empreNueva: I_empresas = {
-                        id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
-                        nombre: item.nombre ? String(item.nombre) : "",
-                        rfc: item.rfc ? String(item.rfc) : "",
-                        telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0,
-                        activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
-                        fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
+                        const empreNueva: I_empresas = {
+                            id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
+                            nombre: item.nombre ? String(item.nombre) : "",
+                            rfc: item.rfc ? String(item.rfc) : "",
+                            telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0,
+                            activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
+                            fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
+                        }
+                        this.empresas.set(empreNueva.id, empreNueva);
+                        console.log("nueva emp" + empreNueva.fechaRegistro)
                     }
-                    this.empresas.set(empreNueva.id, empreNueva);
-                    console.log("nueva emp" + empreNueva.fechaRegistro)
+                } catch (error) {
+                    console.error("Error al cargar o parsear empresas.json:", error);
                 }
+                this.renderTabla(Array.from(this.empresas.values()));
             }
-            this.renderTabla(Array.from(this.empresas.values()));
         };
 
         private renderTabla(data: I_empresas[]): void {
@@ -330,7 +347,7 @@ namespace empresas {
                             .style("padding", "6px")
                             .append("div")
                             .style("display", "flex")
-                            .style("gap", "1opx");
+                            .style("gap", "10px");
 
                         acciones.append("img")
                             .attr("src", "images/editar.svg")
@@ -367,8 +384,6 @@ namespace empresas {
                                     return valor instanceof Date ? this.formatFecha(valor) : String(valor);
                                 });
                         }
-
-
                         return tr;
                     }, update => {
                         for (let i = 0; i < columnas.length; i++) {

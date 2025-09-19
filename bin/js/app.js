@@ -16,7 +16,7 @@ var app;
                 if (this._user)
                     this._user.cerrarPantallaUsuarios();
                 if (this._empre)
-                    this._empre.cerrarPantallaEpresas();
+                    this._empre.cerrarPantallaEmpresas();
             });
             d3.select("body")
                 .append("button")
@@ -27,12 +27,17 @@ var app;
                 }
                 if (!this._user) {
                     this._user = new usuarios.Usuarios(this._empre);
+                    this._empre.setOnEmpresasChange(() => {
+                        this._user.renderTabla(Array.from(this._user.usuarios.values()));
+                        this._user.llenarSelectEmpresas();
+                        // Si usas llenarSelectEmpresasModal en algún modal abierto, también puedes llamarlo aquí
+                    });
                 }
                 this._user.abrirPantallaUsuarios();
                 if (this._circ)
                     this._circ.cerrarPantallaCirculos();
                 if (this._empre)
-                    this._empre.cerrarPantallaEpresas();
+                    this._empre.cerrarPantallaEmpresas();
             });
             d3.select("body")
                 .append("button")

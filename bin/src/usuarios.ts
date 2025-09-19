@@ -12,13 +12,13 @@ namespace usuarios {
 
     export interface I_columna {
         titulo: string;
-        campo: keyof I_Usuarios;  
+        campo: keyof I_Usuarios;
     }
 
     export class Usuarios {
         private empresas: empresas.C_empresas; // referencia a C_empresas
 
-        private usuarios: Map<number, I_Usuarios> = new Map();
+        public usuarios: Map<number, I_Usuarios> = new Map();
         private _ventanaModal: ventanaControl.ventanaControl;
         private _ventana: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
@@ -26,12 +26,12 @@ namespace usuarios {
         constructor(empresasRef: empresas.C_empresas) {
             this.empresas = empresasRef;
             this.pantPrincipal();
-            this.crearModalUsuario();
+            this.crearVentanaModalUsuario();
             this.crearControles();
             this.crearTabla();
             this.cargar();
         }
- 
+
         public pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios",
@@ -54,7 +54,7 @@ namespace usuarios {
             this._ventana.ocultar();
         };
 
-        private crearModalUsuario(): void {
+        private crearVentanaModalUsuario(): void {
             this._ventanaModal = new ventanaControl.ventanaControl({
                 id: "modal-usuario",
                 ancho: 400,
@@ -66,7 +66,7 @@ namespace usuarios {
             });
         };
 
-        private crearModalUsuarios(): void {
+        private crearContenidoModalUsuario(): void {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
 
@@ -108,7 +108,7 @@ namespace usuarios {
         private llenarSelectEmpresasModal(idSelect: string): void {
             const select = d3.select(`#${idSelect}`);
             console.log(select)
-            
+
             const empresasArray = Array.from(this.empresas.getEmpresas().values());
 
             select.selectAll("option").remove();
@@ -127,7 +127,7 @@ namespace usuarios {
         }
 
         private abrirModalUsuario(esAgregar: boolean, datosExistentesU?: I_Usuarios): void {
-            this.crearModalUsuarios();
+            this.crearContenidoModalUsuario();
 
             d3.select("#titulo-modal-user").text(esAgregar ? "Agregar usuario" : "Editar usuario");
 
@@ -142,11 +142,11 @@ namespace usuarios {
             }
 
             document.getElementById("btn-guardar-user")!.onclick = () => {
-                this.gurdarUsuario(esAgregar, datosExistentesU);
+                this.guardarUsuario(esAgregar, datosExistentesU);
             }
         };
 
-        private gurdarUsuario(esAgregar: boolean, datosExistentesU?: I_Usuarios): void {
+        private guardarUsuario(esAgregar: boolean, datosExistentesU?: I_Usuarios): void {
             const userNuevo: Partial<I_Usuarios> = {
                 nombre: (document.getElementById("nombre-user") as HTMLInputElement).value,
                 apellidoPaterno: (document.getElementById("apellidoP-user") as HTMLInputElement).value,
@@ -158,13 +158,14 @@ namespace usuarios {
             };
 
             if (esAgregar) {
-                userNuevo.id = this.usuarios.size + 1;
+                const maxId = Math.max(0, ...Array.from(this.usuarios.keys()));
+                userNuevo.id = maxId + 1;
                 this.usuarios.set(userNuevo.id!, userNuevo as I_Usuarios);
             } else if (datosExistentesU) {
                 this.usuarios.set(datosExistentesU.id, { ...datosExistentesU, ...userNuevo } as I_Usuarios);
             }
 
-            this.cargar(false);
+            this.renderTabla(Array.from(this.usuarios.values()));
             this._ventanaModal.ocultar();
         };
 
@@ -184,8 +185,8 @@ namespace usuarios {
                 .text("Sí, eliminar")
                 .on("click", () => {
                     this.usuarios.delete(usuario.id);
-                    this.cargar(false);
-                    this._ventanaModal.ocultar();
+                    this.renderTabla(Array.from(this.usuarios.values()));
+                    this._ventanaModal.ocultar(); 
                 });
             this._ventanaModal.mostrar();
         };
@@ -222,7 +223,7 @@ namespace usuarios {
                 .on("click", () => this.abrirModalUsuario(true));
         };
 
-        private llenarSelectEmpresas(): void {
+        public llenarSelectEmpresas(): void {
             const select = d3.select("select#select-empresa");
 
             // Obtener todas las empresas desde C_empresas
@@ -350,31 +351,35 @@ namespace usuarios {
 
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
-                const response = await fetch("./datos.json");
-                const data = await response.json();
-                this.usuarios.clear();
+                try {
+                    const response = await fetch("./datos.json");
+                    const data = await response.json();
+                    this.usuarios.clear();
 
-                for (let i = 0; i < data.length; i++) {
-                    const item = data[i];
+                    for (let i = 0; i < data.length; i++) {
+                        const item = data[i];
 
-                    const userNuevo: I_Usuarios = {
-                        id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
-                        nombre: item.nombre ? String(item.nombre) : "",
-                        apellidoPaterno: item.apellidoPaterno ? String(item.apellidoPaterno) : "",
-                        apellidoMaterno: item.apellidoMaterno ? String(item.apellidoMaterno) : "",
-                        usuario: item.usuario ? String(item.usuario) : "",
-                        id_empresa: item.id_empresa !== undefined && item.id_empresa !== null ? Number(item.id_empresa) : 0,
-                        correo: item.correo ? String(item.correo) : "",
-                        telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
+                        const userNuevo: I_Usuarios = {
+                            id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
+                            nombre: item.nombre ? String(item.nombre) : "",
+                            apellidoPaterno: item.apellidoPaterno ? String(item.apellidoPaterno) : "",
+                            apellidoMaterno: item.apellidoMaterno ? String(item.apellidoMaterno) : "",
+                            usuario: item.usuario ? String(item.usuario) : "",
+                            id_empresa: item.id_empresa !== undefined && item.id_empresa !== null ? Number(item.id_empresa) : 0,
+                            correo: item.correo ? String(item.correo) : "",
+                            telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0
+                        }
+                        this.usuarios.set(userNuevo.id, userNuevo);
                     }
-                    this.usuarios.set(userNuevo.id, userNuevo);
+                } catch (error) {
+                    console.error("Error al cargar o parsear datos.json:", error);
                 }
+                this.renderTabla(Array.from(this.usuarios.values()));
+                this.llenarSelectEmpresas();
             }
-            this.renderTabla(Array.from(this.usuarios.values()));
-            this.llenarSelectEmpresas();
         };
 
-        private renderTabla(data: I_Usuarios[]): void {
+        public renderTabla(data: I_Usuarios[]): void {
             const tbody = d3.select("#tabla-usuarios-body");
 
             const columnas = ['nombre', 'apellidoPaterno', 'apellidoMaterno', 'usuario', 'correo', 'telefono', 'id_empresa'];
@@ -384,7 +389,7 @@ namespace usuarios {
                 .join(
                     enter => {
                         const tr = enter.append("tr");
-                        
+
                         const acciones = tr.append("td")
                             .classed("acciones", true)
                             .style("border", "1px solid black")

@@ -15,10 +15,17 @@ var empresas;
             this.formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
             this.formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
             this.pantPrincipal();
-            this.crearModalEmpresa();
+            this.crearVentanaModalEmpresa();
             this.crearControles();
             this.crearTabla();
             this.cargar();
+        }
+        setOnEmpresasChange(callback) {
+            this.onEmpresasChange = callback;
+        }
+        notificarCambio() {
+            if (this.onEmpresasChange)
+                this.onEmpresasChange();
         }
         pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
@@ -36,11 +43,11 @@ var empresas;
             this._ventana.mostrar();
         }
         ;
-        cerrarPantallaEpresas() {
+        cerrarPantallaEmpresas() {
             this._ventana.ocultar();
         }
         ;
-        crearModalEmpresa() {
+        crearVentanaModalEmpresa() {
             this._ventanaModal = new ventanaControl.ventanaControl({
                 id: "modal-empresa",
                 ancho: 400,
@@ -52,7 +59,7 @@ var empresas;
             });
         }
         ;
-        crearModalEmpresas() {
+        crearContenidoModalEmpresa() {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
             modal.append("h3").attr("id", "titulo-modal-empre");
@@ -76,7 +83,7 @@ var empresas;
         }
         ;
         abrirModalEmpresa(esAgregar, datosExistentes) {
-            this.crearModalEmpresas();
+            this.crearContenidoModalEmpresa();
             d3.select("#titulo-modal-empre").text(esAgregar ? "Agregar empresa" : "Editar empresa");
             if (!esAgregar && datosExistentes) {
                 document.getElementById("nombre-empre").value = datosExistentes.nombre;
@@ -99,14 +106,16 @@ var empresas;
                 fechaRegistro: new Date(document.getElementById("fechaRegistro-empre").value),
             };
             if (esAgregar) {
-                nuevaEmpresa.id = this.empresas.size + 1;
+                const maxId = Math.max(0, ...Array.from(this.empresas.keys()));
+                nuevaEmpresa.id = maxId + 1;
                 this.empresas.set(nuevaEmpresa.id, nuevaEmpresa);
             }
             else if (datosExistentes) {
                 this.empresas.set(datosExistentes.id, Object.assign(Object.assign({}, datosExistentes), nuevaEmpresa));
             }
-            this.cargar(false);
+            this.renderTabla(Array.from(this.empresas.values()));
             this._ventanaModal.ocultar();
+            this.notificarCambio();
         }
         ;
         mostrarModalConfirmacion(empresa) {
@@ -121,9 +130,9 @@ var empresas;
                 .text("Sí, eliminar")
                 .on("click", () => {
                 this.empresas.delete(empresa.id);
-                console.log(this.empresas);
-                this.cargar(false);
+                this.renderTabla(Array.from(this.empresas.values()));
                 this._ventanaModal.ocultar();
+                this.notificarCambio();
             });
             this._ventanaModal.mostrar();
         }
@@ -245,24 +254,29 @@ var empresas;
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
-                    const response = yield fetch("./empresas.json");
-                    const data = yield response.json();
-                    this.empresas.clear();
-                    for (let i = 0; i < data.length; i++) {
-                        const item = data[i];
-                        const empreNueva = {
-                            id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
-                            nombre: item.nombre ? String(item.nombre) : "",
-                            rfc: item.rfc ? String(item.rfc) : "",
-                            telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0,
-                            activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
-                            fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
-                        };
-                        this.empresas.set(empreNueva.id, empreNueva);
-                        console.log("nueva emp" + empreNueva.fechaRegistro);
+                    try {
+                        const response = yield fetch("./empresas.json");
+                        const data = yield response.json();
+                        this.empresas.clear();
+                        for (let i = 0; i < data.length; i++) {
+                            const item = data[i];
+                            const empreNueva = {
+                                id: item.id !== undefined && item.id !== null ? Number(item.id) : 0,
+                                nombre: item.nombre ? String(item.nombre) : "",
+                                rfc: item.rfc ? String(item.rfc) : "",
+                                telefono: item.telefono !== undefined && item.telefono !== null ? Number(item.telefono) : 0,
+                                activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
+                                fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
+                            };
+                            this.empresas.set(empreNueva.id, empreNueva);
+                            console.log("nueva emp" + empreNueva.fechaRegistro);
+                        }
                     }
+                    catch (error) {
+                        console.error("Error al cargar o parsear empresas.json:", error);
+                    }
+                    this.renderTabla(Array.from(this.empresas.values()));
                 }
-                this.renderTabla(Array.from(this.empresas.values()));
             });
         }
         ;
@@ -279,7 +293,7 @@ var empresas;
                     .style("padding", "6px")
                     .append("div")
                     .style("display", "flex")
-                    .style("gap", "1opx");
+                    .style("gap", "10px");
                 acciones.append("img")
                     .attr("src", "images/editar.svg")
                     .attr("width", 20)
