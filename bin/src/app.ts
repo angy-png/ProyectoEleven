@@ -40,9 +40,6 @@ namespace app {
                     if (this._empre) this._empre.cerrarPantallaEmpresas();
                 });
 
-
-
-
             d3.select("body")
                 .append("button")
                 .text("Empresas")

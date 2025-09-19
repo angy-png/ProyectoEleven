@@ -42,7 +42,6 @@ namespace empresas {
             if (this.onEmpresasChange) this.onEmpresasChange();
         }
 
-
         public pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "VentanaEmpresas",
@@ -137,7 +136,7 @@ namespace empresas {
                 const maxId = Math.max(0, ...Array.from(this.empresas.keys()));
                 nuevaEmpresa.id = maxId + 1;
                 this.empresas.set(nuevaEmpresa.id!, nuevaEmpresa as I_empresas);
-            } else if (datosExistentes) {
+             } else if (datosExistentes) {
                 this.empresas.set(datosExistentes.id, { ...datosExistentes, ...nuevaEmpresa } as I_empresas);
             }
             this.renderTabla(Array.from(this.empresas.values()));
