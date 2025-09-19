@@ -17,13 +17,11 @@ namespace ventanaControl {
 
         private configuracion: IVentana;
 
-        public get id(): string {
-            return this.configuracion.id;
-        }
         constructor(configuracion: IVentana) {
             this.configuracion = configuracion;
 
             if (configuracion.modal) {
+                // Crear overlay oculto inicialmente
                 this._oscurecerCon = d3.select("body")
                     .append("div")
                     .style("position", "fixed")
@@ -32,7 +30,7 @@ namespace ventanaControl {
                     .style("width", "100%")
                     .style("height", "100%")
                     .style("background-color", "rgba(0,0,0,0.6)")  
-                    .style("z-index", "1999")  
+                    .style("z-index", "1999") // debajo del modal
                     .style("display", "none");
             }
 
@@ -68,6 +66,8 @@ namespace ventanaControl {
 
             botonCerrar.append("image")
                 .attr("href", "images/icono_cerrar.svg")
+
+
                 .attr("width", 30)
                 .attr("height", 30)
                 .on("click", () => {
@@ -99,4 +99,13 @@ namespace ventanaControl {
     }
 }
 
- 
+
+
+
+
+//  private _conten: d3.Selection<
+//             HTMLDivElement,//GElement, tipo del elemento seleccionado (ej. HTMLDivElement)
+//             unknown, //Datum, tipo de los datos asociados (unknown si no se sabe)
+//             HTMLElement, //PElement, tipo del padre de ese elemento (ej. HTMLElement)
+//             any>;//PDatum, tipo de los datos del padre (any si no importa)
+//         private _ventanaModal: ventanaControl.ventanaControl;

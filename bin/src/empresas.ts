@@ -15,8 +15,7 @@ namespace empresas {
     }
 
     export class C_empresas {
-        private empresas: Map<number, I_empresas> = new Map();
-        // private contadorPalabras = new Map<number, I_empresas>();s
+        public empresas: Map<number, I_empresas> = new Map();
         private _ventanaModal: ventanaControl.ventanaControl;
         private _ventana: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
@@ -24,15 +23,13 @@ namespace empresas {
         private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
         private formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
 
-
         constructor() {
             this.pantPrincipal()
+            this.crearModalEmpresa();
             this.crearControles();
-            this.crearModalUsuario();
             this.crearTabla();
             this.cargar();
         }
-        //ciclos de comunicacion
 
         public pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
@@ -45,6 +42,252 @@ namespace empresas {
             });
             this._conten = this._ventana._contenedor;
         };
+
+        public abrirPantallaEmpresas(): void {
+            this._ventana.mostrar();
+        };
+
+        public cerrarPantallaEpresas(): void {
+            this._ventana.ocultar();
+        };
+
+        private crearModalEmpresa(): void {
+            this._ventanaModal = new ventanaControl.ventanaControl({
+                id: "modal-empresa",
+                ancho: 400,
+                alto: 350,
+                colorFondo: "#a5c9f1ff",
+                titulo: "Usuario",
+                modal: true,
+                onClose: () => console.log("Modal empresa cerrado"),
+            });
+        };
+
+        private crearModalEmpresas(): void {
+            this._ventanaModal.limpiarContenido();
+            const modal = this._ventanaModal._contenido;
+
+            modal.append("h3").attr("id", "titulo-modal-empre");
+
+            modal.append("p").text("Nombre");
+            modal.append("input").attr("id", "nombre-empre");
+
+            modal.append("p").text("RFC");
+            modal.append("input").attr("id", "rfc-empre");
+
+            modal.append("p").text("Teléfono");
+            modal.append("input").attr("id", "telefono-empre");
+
+            modal.append("p").text("Activo");
+            const select = modal.append("select").attr("id", "activo-empre");
+            select.append("option").attr("value", "true").text("Sí");
+            select.append("option").attr("value", "false").text("No");
+
+            modal.append("p").text("Fecha de registro");
+            modal.append("input").attr("id", "fechaRegistro-empre").attr("type", "datetime-local");
+
+            modal.append("button")
+                .text("Guardar")
+                .attr("id", "btn-guardar-empre")
+                .style("margin-right", "10px");
+
+            this._ventanaModal.mostrar();
+        };
+
+        private abrirModalEmpresa(esAgregar: boolean, datosExistentes?: I_empresas): void {
+            this.crearModalEmpresas();
+
+            d3.select("#titulo-modal-empre").text(esAgregar ? "Agregar empresa" : "Editar empresa");
+
+            if (!esAgregar && datosExistentes) {
+                (document.getElementById("nombre-empre") as HTMLInputElement).value = datosExistentes.nombre;
+                (document.getElementById("rfc-empre") as HTMLInputElement).value = datosExistentes.rfc;
+                (document.getElementById("telefono-empre") as HTMLInputElement).value = datosExistentes.telefono.toString();
+                (document.getElementById("activo-empre") as HTMLSelectElement).value = datosExistentes.activo ? "true" : "false";
+                (document.getElementById("fechaRegistro-empre") as HTMLInputElement).value = this.formatInputFecha(datosExistentes.fechaRegistro);
+            }
+
+            document.getElementById("btn-guardar-empre")!.onclick = () => {
+                this.guardarEmpresa(esAgregar, datosExistentes);
+            };
+        };
+
+        private guardarEmpresa(esAgregar: boolean, datosExistentes?: I_empresas): void {
+            const nuevaEmpresa: Partial<I_empresas> = {
+                nombre: (document.getElementById("nombre-empre") as HTMLInputElement).value,
+                rfc: (document.getElementById("rfc-empre") as HTMLInputElement).value,
+                telefono: Number((document.getElementById("telefono-empre") as HTMLInputElement).value),
+                activo: (document.getElementById("activo-empre") as HTMLSelectElement).value === "true",
+                fechaRegistro: new Date((document.getElementById("fechaRegistro-empre") as HTMLInputElement).value),
+            };
+
+            if (esAgregar) {
+                nuevaEmpresa.id = this.empresas.size + 1;
+                this.empresas.set(nuevaEmpresa.id!, nuevaEmpresa as I_empresas);
+            } else if (datosExistentes) {
+                this.empresas.set(datosExistentes.id, { ...datosExistentes, ...nuevaEmpresa } as I_empresas);
+            }
+
+            this.cargar(false);
+            this._ventanaModal.ocultar();
+        };
+
+        private mostrarModalConfirmacion(empresa: I_empresas): void {
+            this._ventanaModal.limpiarContenido();
+            const modal = this._ventanaModal._contenido;
+
+            modal.append("h2").text("Confirmar eliminación");
+            modal.append("p")
+                .text(`¿Estás seguro de que deseas eliminar la empresa "${empresa.nombre}"?`)
+                .style("margin-bottom", "20px");
+
+            const botones = modal.append("div").style("display", "flex").style("gap", "10px");
+
+            botones.append("button")
+                .text("Sí, eliminar")
+                .on("click", () => {
+                    this.empresas.delete(empresa.id);
+                    console.log(this.empresas)
+                    this.cargar(false);
+                    this._ventanaModal.ocultar();
+                });
+            this._ventanaModal.mostrar();
+        };
+
+        private crearControles(): void {
+            const contenedorInput = this._conten
+                .append("div")
+                .style("display", "flex")
+                .style("gap", "10px");
+
+
+            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por nombre");
+
+            const aplicarFiltro = () => {
+                const textoBusqueda = inputTexto.property("value") || "";
+
+                this.filtrar(textoBusqueda);
+            };
+
+            inputTexto.on("input", aplicarFiltro);
+
+            contenedorInput.append("img")
+                .attr("src", "images/nuevo.svg")
+                .attr("width", 30)
+                .attr("height", 30)
+                .style("cursor", "pointer")
+                .style("margin-left", "auto")
+                .on("click", () => this.abrirModalEmpresa(true));
+        };
+
+        private filtrar(nombre: string) {
+            const filtrados = Array.from(this.empresas.values()) //map a array 
+                .filter(u => {
+                    // Filtrar por nombre si se escribió algo, true si nombre es vacío, null, undefined, etc.  ||=o
+                    const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
+                    return coincideNombre;
+                });
+
+            this.renderTabla(filtrados);
+        };
+
+        public getEmpresas(): Map<number, I_empresas> {
+            return this.empresas;
+        };
+
+        private crearTabla(): void {
+            const tabla = this._conten.append("table")
+                .attr("id", "tabla-empresas")
+                .style("width", "100%")
+                .style("border-collapse", "collapse")
+                .style("margin-top", "20px");
+
+            let columnaActiva: keyof I_empresas | null = null;
+            let direccionActiva: 'asc' | 'desc' | null = null;
+
+            const thead = tabla.append("thead");
+            const trHead = thead.append("tr");
+
+            //Helper para crear columnas con ordenamiento
+            const crearColumnaOrdenable = (titulo: string, campo: keyof I_empresas) => {
+                const th = trHead.append("th")
+                    .style("border", "1px solid black")
+                    .style("background-color", "#bde9c4ff")
+                    .style("padding", "4px");
+
+                const cont = th.append("div")
+                    .style("display", "flex")
+                    .style("justify-content", "space-between")
+                    .style("align-items", "center");
+
+                cont.append("span").text(titulo);
+
+                const flechas = cont.append("span")
+                    .style("display", "flex")
+                    .style("flex-direction", "column")
+                    .style("line-height", "8px");
+
+                const asc = flechas.append("span")
+                    .attr("class", `flecha-asc-${campo}`)
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▲")
+                    .on("click", () => {
+                        const datosOrdenados = usuarios.ordenar(Array.from(this.empresas.values()), campo, true);
+                        this.renderTabla(datosOrdenados);
+                        columnaActiva = campo;
+                        direccionActiva = "asc";
+                        actualizarFlechas();
+                    });
+
+                const desc = flechas.append("span")
+                    .attr("class", `flecha-desc-${campo}`)
+                    .style("cursor", "pointer")
+                    .style("font-size", "10px")
+                    .style("color", "gray")
+                    .text("▼")
+                    .on("click", () => {
+                        const datosOrdenados = usuarios.ordenar(Array.from(this.empresas.values()), campo, false);
+                        this.renderTabla(datosOrdenados);
+                        columnaActiva = campo;
+                        direccionActiva = "desc";
+                        actualizarFlechas();
+                    });
+            };
+            
+            trHead.append("th")
+                .text("Acciones")
+                .style("border", "1px solid black")
+                .style("background-color", "#bde9c4ff")
+                .style("padding", "4px");
+
+            crearColumnaOrdenable("Nombre", "nombre");
+            crearColumnaOrdenable("RFC", "rfc");
+            crearColumnaOrdenable("Teléfono", "telefono");
+            crearColumnaOrdenable("Activo", "activo");
+            crearColumnaOrdenable("Fecha registro", "fechaRegistro");
+
+            //Cuerpo de tabla
+            tabla.append("tbody").attr("id", "tabla-empresas-body");
+
+            const actualizarFlechas = () => {
+                const thElements = trHead.selectAll("th").nodes();
+
+                for (let i = 0; i < thElements.length; i++) {
+                    const th = d3.select(thElements[i]);
+
+                    const flechaAsc = th.select(`[class*="flecha-asc"]`);
+                    const flechaDesc = th.select(`[class*="flecha-desc"]`);
+
+                    if (flechaAsc.empty() || flechaDesc.empty()) continue;
+                    const esColumnaActiva = columnaActiva && flechaAsc.attr("class")?.includes(columnaActiva);
+
+                    flechaAsc.style("color", esColumnaActiva && direccionActiva === "asc" ? "black" : "gray");
+                    flechaDesc.style("color", esColumnaActiva && direccionActiva === "desc" ? "black" : "gray");
+                }
+            };
+        }; 
 
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
@@ -63,44 +306,12 @@ namespace empresas {
                         activo: item.activo !== undefined && item.activo !== null ? item.activo == true || item.activo === "true" : false,
                         fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
                     }
-                    this.empresas.set(empreNueva.id, empreNueva); 
-                    console.log(empreNueva)
+                    this.empresas.set(empreNueva.id, empreNueva);
+                    console.log("nueva emp" + empreNueva.fechaRegistro)
                 }
             }
             this.renderTabla(Array.from(this.empresas.values()));
         };
-
-        private filtrar(nombre: string) {
-            const filtrados = Array.from(this.empresas.values())
-                .filter(u => {
-                    const coindiceNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
-                    return coindiceNombre;
-                });
-                this.renderTabla(filtrados); 
-        }
-
-        private crearControles(): void {
-            const contenedorInput = this._conten
-                .append("div")
-                .style("display", "flex")
-                .style("gap", "10px");
-           
-
-            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por empresa");
-            const aplicarFiltro = () => {
-                const textoBusqueda = inputTexto.property("value") || "";
-                this.filtrar(textoBusqueda)
-            }
-            inputTexto.on("input", aplicarFiltro);
-
-            contenedorInput.append("img")
-                .attr("src", "images/nuevo.svg")
-                .attr("width", 30)
-                .attr("height", 30)
-                .style("cursor", "pointer")
-                .style("margin-left", "auto")
-                .on("click", () => this.abrirModalUsuario("agregar"));
-        }
 
         private renderTabla(data: I_empresas[]): void {
             const tbody = d3.select("#tabla-empresas-body");
@@ -129,7 +340,7 @@ namespace empresas {
                             .on("click", (event, d) => {
                                 const usuarioActualizado = this.empresas.get(d.id);
                                 if (usuarioActualizado) {
-                                    this.abrirModalUsuario("editar", usuarioActualizado);
+                                    this.abrirModalEmpresa(false, usuarioActualizado);
                                 }
                             })
 
@@ -178,260 +389,5 @@ namespace empresas {
                     exit => exit.remove()
                 );
         };
-
-        private crearTabla(): void {
-            const tabla = this._conten.append("table")
-                .attr("id", "tabla-empresas")
-                .style("width", "100%")
-                .style("border-collapse", "collapse")
-                .style("margin-top", "20px");
-
-
-            const columnas: I_columna[] = [
-                { titulo: 'Acciones', campo: null },
-                { titulo: 'Nombre', campo: 'nombre' },
-                { titulo: 'Rfc', campo: 'rfc' },
-                { titulo: 'Telefono', campo: 'telefono' },
-                { titulo: 'Activo', campo: 'activo' },
-                { titulo: 'Fecha registro', campo: 'fechaRegistro' }
-            ];
-
-            let columnaActiva: keyof I_empresas | null = null;
-            let direccionActiva: 'asc' | 'desc' | null = null;
-
-            const thead = tabla.append("thead");
-            const trHead = thead.append("tr");
-
-            trHead.selectAll("th")
-                .data(columnas)
-                .enter()
-                .append("th")
-                .style("border", "1px solid black")
-                .style("background-color", "#bde9c4ff")
-                .style("padding", "4px")
-                .each(function (d) {
-                    const th = d3.select(this);
-
-                    if (!d.campo) {
-                        th.text(d.titulo);
-                        return;
-                    }
-
-                    const cont = th.append("div")
-                        .style("display", "flex")
-                        .style("justify-content", "space-between")
-                        .style("aling-items", "center");
-
-                    cont.append("span").text(d.titulo);
-
-                    const flechas = cont.append("span")
-                        .style("display", "flex")
-                        .style("flex-direction", "column")
-                        .style("line-height", "8px");
-
-                    flechas.append("span")
-                        .attr("class", "flecha-asc")
-                        .style("cursor", "pointer")
-                        .style("font-size", "10px")
-                        .style("color", "gray")
-                        .text("▲");
-
-                    flechas.append("span")
-                        .attr("class", "flecha-desc")
-                        .style("cursor", "pointer")
-                        .style("font-size", "10px")
-                        .style("color", "gray")
-                        .text("▼");
-
-                })
-                .each((d: I_columna, i, nodes) => {
-
-                    if (!d.campo) return;
-
-                    const th = d3.select(nodes[i]);
-                    const asc = th.select(".flecha-asc");
-                    const desc = th.select(".flecha-desc");
-
-                    asc.on("click", () => {
-                        const datosOrdenados = usuarios.ordenar(Array.from(this.empresas.values()), d.campo!, true);
-                        this.renderTabla(datosOrdenados);
-                        columnaActiva = d.campo!;
-                        direccionActiva = 'asc';
-                        actualizarFlechas();
-                    });
-
-                    desc.on("click", () => {
-                        const datosOrdenados = usuarios.ordenar(Array.from(this.empresas.values()), d.campo!, false);
-                        this.renderTabla(datosOrdenados);
-                        columnaActiva = d.campo!;
-                        direccionActiva = 'desc';
-                        actualizarFlechas();
-                    });
-                });
-
-            tabla.append("tbody").attr("id", "tabla-empresas-body")
-
-            const actualizarFlechas = () => {
-                trHead.selectAll("th").each((d: I_columna, i, nodes) => {
-                    if (!d.campo) return;
-
-                    const th = d3.select(nodes[i]);
-                    const asc = th.select(".flecha-asc");
-                    const desc = th.select(".flecha-desc");
-
-                    if (d.campo === columnaActiva) {
-                        asc.style("color", direccionActiva === 'asc' ? "black" : "gray");
-                        desc.style("color", direccionActiva === 'desc' ? "black" : "gray");
-                    } else {
-                        asc.style("color", "gray");
-                        desc.style("color", "gray");
-                    }
-                })
-            }
-        }
-
-        private crearModalUsuario(): void {
-            this._ventanaModal = new ventanaControl.ventanaControl({
-                id: "modal-empresa",
-                ancho: 400,
-                alto: 350,
-                colorFondo: "#a5c9f1ff",
-                titulo: "Usuario",
-                modal: true,
-                onClose: () => console.log("Modal empresa cerrado"),
-            });
-        }
-
-        private mostrarModalConfirmacion(empresa: I_empresas): void {
-            this._ventanaModal.limpiarContenido();
-            const modal = this._ventanaModal._contenido;
-
-            modal.append("h2").text("Confirmar eliminación");
-            modal.append("p")
-                .text("¿Estás seguro de que deseas eliminar este usuario?")
-                .style("margin-bottom", "20px");
-
-            const botones = modal.append("div").style("display", "flex").style("gap", "10px");
-
-            botones.append("button")
-                .text("Sí, eliminar")
-                .on("click", () => {
-                    this.empresas.delete(empresa.id);
-                    console.log(this.empresas)
-                    this.cargar(false);
-                    this._ventanaModal.ocultar();
-                });
-            this._ventanaModal.mostrar();
-        }
-
-        private abrirModalUsuario(modo: "agregar" | "editar", datosExistentes?: I_empresas): void {
-            this._ventanaModal.limpiarContenido();
-            const modal = this._ventanaModal._contenido;
-            modal.append("h3")
-                .text(modo === "agregar" ? "Agregar" : "Editar");
-
-            const campos = [
-                { id: "nombre", label: "Nombre" },
-                { id: "rfc", label: "Rfc" },
-                { id: "telefono", label: "Telefono" },
-                { id: "activo", label: "Activo" },
-                { id: "fechaRegistro", label: "Fecha de registro" }
-            ];
-
-            for (let i = 0; i < campos.length; i++) {
-                const campo = campos[i];
-                modal.append("p").text(campo.label);
-
-                if (campo.id === "activo") {
-                    const select = modal.append("select")
-                        .attr("id", campo.id)
-                        .style("margin-bottom", "10px")
-                        .style("display", "block");
-
-                    select.append("option")
-                        .attr("value", "true")
-                        .text("Sí");
-
-                    select.append("option")
-                        .attr("value", "false")
-                        .text("No");
-                    if (datosExistentes) {
-                        if (datosExistentes.activo) {
-                            select.property("value", "true");
-                        } else {
-                            select.property("value", "false");
-                        }
-                    }
-                } else if (campo.id === "fechaRegistro") {
-                    const fechaInput = modal.append("input")
-                        .attr("id", campo.id)
-                        .attr("type", "datetime-local")
-                        .style("margin-bottom", "10px")
-                        .style("display", "block");
-
-                    if (datosExistentes) {
-                        const fechaLocal = datosExistentes.fechaRegistro; // Date ya en JS
-                        const fechaStr = this.formatInputFecha(fechaLocal);    // Usando d3 para formatear
-                        fechaInput.property("value", fechaStr);
-                    }
-                }
-                else {
-                    modal.append("input")
-                        .attr("id", campo.id)
-                        .style("margin-bottom", "10px")
-                        .style("display", "block")
-                        .property("value", datosExistentes?.[campo.id] ?? "");
-                }
-            };
-            modal.append("button")
-                .text("Guardar")
-                .style("margin-right", "10px")
-                .on("click", () => {
-                    const nuevaEmpresa: Partial<I_empresas> = {};
-                    for (let i = 0; i < campos.length; i++) {
-                        const campo = campos[i];
-                        const input = document.getElementById(campo.id) as HTMLInputElement;
-                        let valor: any = input.value;
-
-                        if (campo.id === "telefono") {
-                            valor = Number(valor);
-                        }
-
-                        else if (campo.id === "activo") {
-                            valor = valor.toLowerCase() === "true";
-                        }
-
-                        if (campo.id === "fechaRegistro") {
-                            const inputFecha = document.getElementById(campo.id) as HTMLInputElement;
-                            valor = new Date(inputFecha.value); // hora local
-
-                        }
-                        nuevaEmpresa[campo.id as keyof I_empresas] = valor as never;
-                    };
-                    if (modo === "agregar") {
-                        nuevaEmpresa.id = this.empresas.size + 1;
-                        this.empresas.set(nuevaEmpresa.id!, nuevaEmpresa as I_empresas);
-                    } else if (modo === "editar" && datosExistentes) {
-                        this.empresas.set(datosExistentes.id, {
-                            ...datosExistentes,
-                            ...nuevaEmpresa
-                        } as I_empresas);
-
-                    }
-                    this.cargar(false);
-                    this._ventanaModal.ocultar();
-                });
-
-            this._ventanaModal.mostrar();
-        }
-
-
-        public abrirPantallaEmpresas(): void {
-            this._ventana.mostrar();
-        }
-
-        public cerrarPantallaEpresas(): void {
-            this._ventana.ocultar();
-        }
     }
 }

@@ -14,7 +14,7 @@ namespace circulos {
         private svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>;
 
         private circulosMap: Map<number, ICirculo> = new Map();
-        
+
         private radio = 20;
         private svgWidth = 400;
         private svgHeight = 300;
