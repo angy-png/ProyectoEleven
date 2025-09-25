@@ -39,14 +39,6 @@ var empresas;
             this._conten = this._ventana._contenedor;
         }
         ;
-        abrirPantallaEmpresas() {
-            this._ventana.mostrar();
-        }
-        ;
-        cerrarPantallaEmpresas() {
-            this._ventana.ocultar();
-        }
-        ;
         crearVentanaModalEmpresa() {
             this._ventanaModal = new ventanaControl.ventanaControl({
                 id: "modal-empresa",
@@ -55,7 +47,9 @@ var empresas;
                 colorFondo: "#a5c9f1ff",
                 titulo: "Usuario",
                 modal: true,
-                onClose: () => console.log("Modal empresa cerrado"),
+                onClose() {
+                    console.log("Modal empresa cerrado");
+                }
             });
         }
         ;
@@ -181,7 +175,6 @@ var empresas;
             let direccionActiva = null;
             const thead = tabla.append("thead");
             const trHead = thead.append("tr");
-            //Helper para crear columnas con ordenamiento
             const crearColumnaOrdenable = (titulo, campo) => {
                 const th = trHead.append("th")
                     .style("border", "1px solid black")
@@ -341,6 +334,14 @@ var empresas;
                 ;
                 return update;
             }, exit => exit.remove());
+        }
+        ;
+        abrirPantallaEmpresas() {
+            this._ventana.mostrar();
+        }
+        ;
+        cerrarPantallaEmpresas() {
+            this._ventana.ocultar();
         }
         ;
     }

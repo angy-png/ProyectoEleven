@@ -9,22 +9,16 @@ namespace empresas {
         fechaRegistro: Date
     }
 
-    export interface I_columna {
-        titulo: string;
-        campo: keyof I_empresas;
-    }
-
     export class C_empresas {
-        public empresas: Map<number, I_empresas> = new Map();
-        private _ventanaModal: ventanaControl.ventanaControl;
+        public empresas: Map<number, I_empresas> = new Map(); 
         private _ventana: ventanaControl.ventanaControl;
+        private _ventanaModal: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
 
         private formatFecha = d3.timeFormat("%d/%m/%Y, %I:%M:%S %p");
         private formatInputFecha = d3.timeFormat("%Y-%m-%dT%H:%M");
 
         private onEmpresasChange?: () => void;
-
 
         constructor() {
             this.pantPrincipal()
@@ -54,14 +48,6 @@ namespace empresas {
             this._conten = this._ventana._contenedor;
         };
 
-        public abrirPantallaEmpresas(): void {
-            this._ventana.mostrar();
-        };
-
-        public cerrarPantallaEmpresas(): void {
-            this._ventana.ocultar();
-        };
-
         private crearVentanaModalEmpresa(): void {
             this._ventanaModal = new ventanaControl.ventanaControl({
                 id: "modal-empresa",
@@ -70,7 +56,9 @@ namespace empresas {
                 colorFondo: "#a5c9f1ff",
                 titulo: "Usuario",
                 modal: true,
-                onClose: () => console.log("Modal empresa cerrado"),
+                onClose(){
+                    console.log("Modal empresa cerrado")
+                }
             });
         };
 
@@ -117,7 +105,6 @@ namespace empresas {
                 (document.getElementById("activo-empre") as HTMLSelectElement).value = datosExistentes.activo ? "true" : "false";
                 (document.getElementById("fechaRegistro-empre") as HTMLInputElement).value = this.formatInputFecha(datosExistentes.fechaRegistro);
             }
-
             document.getElementById("btn-guardar-empre")!.onclick = () => {
                 this.guardarEmpresa(esAgregar, datosExistentes);
             };
@@ -136,7 +123,7 @@ namespace empresas {
                 const maxId = Math.max(0, ...Array.from(this.empresas.keys()));
                 nuevaEmpresa.id = maxId + 1;
                 this.empresas.set(nuevaEmpresa.id!, nuevaEmpresa as I_empresas);
-             } else if (datosExistentes) {
+            } else if (datosExistentes) {
                 this.empresas.set(datosExistentes.id, { ...datosExistentes, ...nuevaEmpresa } as I_empresas);
             }
             this.renderTabla(Array.from(this.empresas.values()));
@@ -171,7 +158,6 @@ namespace empresas {
                 .append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
-
 
             const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por nombre");
 
@@ -219,8 +205,7 @@ namespace empresas {
 
             const thead = tabla.append("thead");
             const trHead = thead.append("tr");
-
-            //Helper para crear columnas con ordenamiento
+ 
             const crearColumnaOrdenable = (titulo: string, campo: keyof I_empresas) => {
                 const th = trHead.append("th")
                     .style("border", "1px solid black")
@@ -402,6 +387,14 @@ namespace empresas {
                     },
                     exit => exit.remove()
                 );
+        };
+
+          public abrirPantallaEmpresas(): void {
+            this._ventana.mostrar();
+        };
+
+        public cerrarPantallaEmpresas(): void {
+            this._ventana.ocultar();
         };
     }
 }

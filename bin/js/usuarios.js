@@ -33,14 +33,6 @@ var usuarios;
             this._conten = this._ventana._contenedor;
         }
         ;
-        abrirPantallaUsuarios() {
-            this._ventana.mostrar();
-        }
-        ;
-        cerrarPantallaUsuarios() {
-            this._ventana.ocultar();
-        }
-        ;
         crearVentanaModalUsuario() {
             this._ventanaModal = new ventanaControl.ventanaControl({
                 id: "modal-usuario",
@@ -384,6 +376,14 @@ var usuarios;
                 return update;
             }, exit => exit.remove());
         }
+        abrirPantallaUsuarios() {
+            this._ventana.mostrar();
+        }
+        ;
+        cerrarPantallaUsuarios() {
+            this._ventana.ocultar();
+        }
+        ;
     }
     usuarios.Usuarios = Usuarios;
     // true por defecto es ascendente 

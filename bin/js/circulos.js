@@ -38,12 +38,6 @@ var circulos;
                 .style("cursor", "pointer")
                 .on("click", () => this.eliminarSeleccionado());
         }
-        abrirPantallaCirculos() {
-            this._ventana.mostrar();
-        }
-        cerrarPantallaCirculos() {
-            this._ventana.ocultar();
-        }
         agregarCirculo() {
             const nuevo = {
                 id: this.contador++,
@@ -114,6 +108,12 @@ var circulos;
         }
         getRandomColor() {
             return d3.interpolateRainbow(Math.random());
+        }
+        abrirPantallaCirculos() {
+            this._ventana.mostrar();
+        }
+        cerrarPantallaCirculos() {
+            this._ventana.ocultar();
         }
     }
     circulos.SvgCirculo = SvgCirculo;

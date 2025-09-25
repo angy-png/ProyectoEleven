@@ -10,11 +10,6 @@ namespace usuarios {
         telefono: number;
     }
 
-    export interface I_columna {
-        titulo: string;
-        campo: keyof I_Usuarios;
-    }
-
     export class Usuarios {
         private empresas: empresas.C_empresas; // referencia a C_empresas
 
@@ -44,14 +39,6 @@ namespace usuarios {
                 },
             });
             this._conten = this._ventana._contenedor;
-        };
-
-        public abrirPantallaUsuarios(): void {
-            this._ventana.mostrar();
-        };
-
-        public cerrarPantallaUsuarios(): void {
-            this._ventana.ocultar();
         };
 
         private crearVentanaModalUsuario(): void {
@@ -101,7 +88,6 @@ namespace usuarios {
                 .text("Guardar")
                 .attr("id", "btn-guardar-user")
                 .style("margin-right", "10px");
-
             this._ventanaModal.mostrar();
         }
 
@@ -140,7 +126,6 @@ namespace usuarios {
                 (document.getElementById("telefono-user") as HTMLInputElement).value = datosExistentesU.telefono.toString();
                 (document.getElementById("id_empresa-user") as HTMLSelectElement).value = datosExistentesU.id_empresa.toString();
             }
-
             document.getElementById("btn-guardar-user")!.onclick = () => {
                 this.guardarUsuario(esAgregar, datosExistentesU);
             }
@@ -156,7 +141,6 @@ namespace usuarios {
                 telefono: Number((document.getElementById("telefono-user") as HTMLInputElement).value),
                 id_empresa: Number((document.getElementById("id_empresa-user") as HTMLInputElement).value),
             };
-
             if (esAgregar) {
                 const maxId = Math.max(0, ...Array.from(this.usuarios.keys()));
                 userNuevo.id = maxId + 1;
@@ -186,7 +170,7 @@ namespace usuarios {
                 .on("click", () => {
                     this.usuarios.delete(usuario.id);
                     this.renderTabla(Array.from(this.usuarios.values()));
-                    this._ventanaModal.ocultar(); 
+                    this._ventanaModal.ocultar();
                 });
             this._ventanaModal.mostrar();
         };
@@ -251,7 +235,6 @@ namespace usuarios {
                     const coincideEmpresa = !idEmpresa || u.id_empresa === idEmpresa;
                     return coincideNombre && coincideEmpresa;
                 });
-
             this.renderTabla(filtrados);
         }
 
@@ -433,7 +416,6 @@ namespace usuarios {
                                     return (d as any)[clave] ?? "—";
                                 });
                         }
-
                         return tr;
                     },
                     update => {
@@ -453,6 +435,13 @@ namespace usuarios {
                     exit => exit.remove()
                 );
         }
+        public abrirPantallaUsuarios(): void {
+            this._ventana.mostrar();
+        };
+
+        public cerrarPantallaUsuarios(): void {
+            this._ventana.ocultar();
+        };
     }
     // true por defecto es ascendente 
     export function ordenar<T>(array: T[], propiedad: keyof T, asc: boolean = true) {
@@ -490,9 +479,7 @@ namespace usuarios {
                 } else {
                     return valorB.getTime() - valorA.getTime();
                 }
-
             }
-
             return 0;
         });
 

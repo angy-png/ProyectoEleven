@@ -9,18 +9,16 @@ namespace circulos {
 
     export class SvgCirculo {
         private _ventana: ventanaControl.ventanaControl;
+        private circulosMap: Map<number, ICirculo> = new Map();
 
         private _contenedor: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
         private svg: d3.Selection<SVGSVGElement, unknown, HTMLElement, any>;
-
-        private circulosMap: Map<number, ICirculo> = new Map();
 
         private radio = 20;
         private svgWidth = 400;
         private svgHeight = 300;
         private selectId: number | null = null;
         private contador: number = -1;
-
 
         constructor() {
             this._ventana = new ventanaControl.ventanaControl({
@@ -33,7 +31,6 @@ namespace circulos {
                     console.log("La ventana ventana-circulos fue cerrada.");
                 }
             });
-
 
             this._contenedor = this._ventana._contenedor;
 
@@ -58,13 +55,6 @@ namespace circulos {
                 .style("padding", "10px 20px")
                 .style("cursor", "pointer")
                 .on("click", () => this.eliminarSeleccionado());
-        }
-        public abrirPantallaCirculos(): void {
-            this._ventana.mostrar();
-
-        }
-        public cerrarPantallaCirculos(): void {
-            this._ventana.ocultar();
         }
 
         private agregarCirculo(): void {
@@ -103,7 +93,6 @@ namespace circulos {
                 .duration(300)
                 .attr("r", 0)
                 .remove();
-
 
             // UPDATE
             seleccion
@@ -148,5 +137,14 @@ namespace circulos {
         private getRandomColor(): string {
             return d3.interpolateRainbow(Math.random());
         }
+        public abrirPantallaCirculos(): void {
+            this._ventana.mostrar();
+
+        }
+        public cerrarPantallaCirculos(): void {
+            this._ventana.ocultar();
+        }
     }
+
+
 }

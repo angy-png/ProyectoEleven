@@ -9,9 +9,8 @@ var app;
                 .append("button")
                 .text("Circulos")
                 .on("click", () => {
-                if (!this._circ) {
+                if (!this._circ)
                     this._circ = new circulos.SvgCirculo();
-                }
                 this._circ.abrirPantallaCirculos();
                 if (this._user)
                     this._user.cerrarPantallaUsuarios();
@@ -22,15 +21,13 @@ var app;
                 .append("button")
                 .text("Usuarios")
                 .on("click", () => {
-                if (!this._empre) {
+                if (!this._empre)
                     this._empre = new empresas.C_empresas();
-                }
                 if (!this._user) {
                     this._user = new usuarios.Usuarios(this._empre);
                     this._empre.setOnEmpresasChange(() => {
                         this._user.renderTabla(Array.from(this._user.usuarios.values()));
                         this._user.llenarSelectEmpresas();
-                        // Si usas llenarSelectEmpresasModal en algún modal abierto, también puedes llamarlo aquí
                     });
                 }
                 this._user.abrirPantallaUsuarios();
@@ -43,9 +40,8 @@ var app;
                 .append("button")
                 .text("Empresas")
                 .on("click", () => {
-                if (!this._empre) {
+                if (!this._empre)
                     this._empre = new empresas.C_empresas();
-                }
                 this._empre.abrirPantallaEmpresas();
                 if (this._circ)
                     this._circ.cerrarPantallaCirculos();
