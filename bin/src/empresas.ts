@@ -10,7 +10,7 @@ namespace empresas {
     }
 
     export class C_empresas {
-        public empresas: Map<number, I_empresas> = new Map(); 
+        public empresas: Map<number, I_empresas> = new Map();
         private _ventana: ventanaControl.ventanaControl;
         private _ventanaModal: ventanaControl.ventanaControl;
         private _conten: d3.Selection<HTMLDivElement, unknown, HTMLElement, any>;
@@ -28,14 +28,27 @@ namespace empresas {
             this.cargar();
         }
 
+        // onEmpresasChange guarda internamente la función que se le 
+        // pasó desde apps.ts
         public setOnEmpresasChange(callback: () => void) {
             this.onEmpresasChange = callback;
         }
-
+        
+        // Ejecuta el callback registrado
+        // Se llama cuando algo cambia (ej. agregar/eliminar empresa)
+        // y dispara renderTabla y llenarSelectEmpresas automáticamente
         private notificarCambio() {
             if (this.onEmpresasChange) this.onEmpresasChange();
         }
 
+        //Extrae lo que contiene mapa
+        public getEmpresas(): Map<number, I_empresas> {
+            console.log("Empresas cargadas")
+            console.log(this.empresas);
+            return this.empresas;
+        };
+
+        //Pantallas principales
         public pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "VentanaEmpresas",
@@ -56,12 +69,13 @@ namespace empresas {
                 colorFondo: "#a5c9f1ff",
                 titulo: "Usuario",
                 modal: true,
-                onClose(){
+                onClose() {
                     console.log("Modal empresa cerrado")
                 }
             });
         };
 
+        //Contenido del modal de empresas
         private crearContenidoModalEmpresa(): void {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
@@ -93,6 +107,7 @@ namespace empresas {
             this._ventanaModal.mostrar();
         };
 
+        //Mostrar modal de agregar, editar o eliminar y hacer lo correspondiente
         private abrirModalEmpresa(esAgregar: boolean, datosExistentes?: I_empresas): void {
             this.crearContenidoModalEmpresa();
 
@@ -153,17 +168,20 @@ namespace empresas {
             this._ventanaModal.mostrar();
         };
 
+        //Controles de busqueda por nombre y boton de agregar nueva empresa
         private crearControles(): void {
             const contenedorInput = this._conten
                 .append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
 
-            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por nombre");
+            const inputTexto = contenedorInput
+                .append("input")
+                .attr("type", "text")
+                .attr("placeholder", "Filtrar por nombre");
 
             const aplicarFiltro = () => {
                 const textoBusqueda = inputTexto.property("value") || "";
-
                 this.filtrar(textoBusqueda);
             };
 
@@ -185,14 +203,10 @@ namespace empresas {
                     const coincideNombre = !nombre || u.nombre.toLowerCase().includes(nombre.toLowerCase());
                     return coincideNombre;
                 });
-
             this.renderTabla(filtrados);
         };
 
-        public getEmpresas(): Map<number, I_empresas> {
-            return this.empresas;
-        };
-
+        //Crear la tabla base 
         private crearTabla(): void {
             const tabla = this._conten.append("table")
                 .attr("id", "tabla-empresas")
@@ -205,7 +219,7 @@ namespace empresas {
 
             const thead = tabla.append("thead");
             const trHead = thead.append("tr");
- 
+
             const crearColumnaOrdenable = (titulo: string, campo: keyof I_empresas) => {
                 const th = trHead.append("th")
                     .style("border", "1px solid black")
@@ -286,6 +300,7 @@ namespace empresas {
             };
         };
 
+        //extraer los datos y verificar que cumpla con la interfaz 
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
                 try {
@@ -305,7 +320,7 @@ namespace empresas {
                             fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
                         }
                         this.empresas.set(empreNueva.id, empreNueva);
-                        console.log("nueva emp" + empreNueva.fechaRegistro)
+                        console.log("nueva empresa" + empreNueva.fechaRegistro)
                     }
                 } catch (error) {
                     console.error("Error al cargar o parsear empresas.json:", error);
@@ -314,6 +329,7 @@ namespace empresas {
             }
         };
 
+        //renderizar la tabla al agregar, editar y eliminar
         private renderTabla(data: I_empresas[]): void {
             const tbody = d3.select("#tabla-empresas-body");
 
@@ -340,9 +356,8 @@ namespace empresas {
                             .style("cursor", "pointer")
                             .on("click", (event, d) => {
                                 const usuarioActualizado = this.empresas.get(d.id);
-                                if (usuarioActualizado) {
-                                    this.abrirModalEmpresa(false, usuarioActualizado);
-                                }
+                                if (usuarioActualizado) this.abrirModalEmpresa(false, usuarioActualizado);
+
                             })
 
                         acciones.append("img")
@@ -389,7 +404,7 @@ namespace empresas {
                 );
         };
 
-          public abrirPantallaEmpresas(): void {
+        public abrirPantallaEmpresas(): void {
             this._ventana.mostrar();
         };
 

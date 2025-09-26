@@ -23,9 +23,11 @@ namespace app {
                 .on("click", () => {
                     if (!this._empre) this._empre = new empresas.C_empresas();
 
-
                     if (!this._user) {
                         this._user = new usuarios.Usuarios(this._empre!);
+
+                        // Registra el callback
+                        // Aquí se le pasa a setOnEmpresasChange una función que llama a renderTabla y llenarSelectEmpresas
                         this._empre.setOnEmpresasChange(() => {
                             this._user!.renderTabla(Array.from(this._user!.usuarios.values()));
                             this._user!.llenarSelectEmpresas();

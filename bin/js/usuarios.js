@@ -19,6 +19,7 @@ var usuarios;
             this.crearTabla();
             this.cargar();
         }
+        //Creacion de la pantalla principal y modal
         pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios",
@@ -45,6 +46,7 @@ var usuarios;
             });
         }
         ;
+        //Contenido del modal de usuarios
         crearContenidoModalUsuario() {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
@@ -89,6 +91,7 @@ var usuarios;
                 .attr("value", d => String(d.id))
                 .text(d => d.nombre);
         }
+        //Mostrar modal de agregar, editar o eliminar y hacer lo correspondiente
         abrirModalUsuario(esAgregar, datosExistentesU) {
             this.crearContenidoModalUsuario();
             d3.select("#titulo-modal-user").text(esAgregar ? "Agregar usuario" : "Editar usuario");
@@ -146,6 +149,7 @@ var usuarios;
             this._ventanaModal.mostrar();
         }
         ;
+        //Controles de busqueda por nombre y empresa, boton de agregar nuevo usuario
         crearControles() {
             const contenedorInput = this._conten
                 .append("div")
@@ -200,6 +204,7 @@ var usuarios;
             });
             this.renderTabla(filtrados);
         }
+        //crear tabla base 
         crearTabla() {
             const tabla = this._conten.append("table")
                 .attr("id", "tabla-usuarios")
@@ -279,6 +284,7 @@ var usuarios;
                 }
             };
         }
+        //extraer los datos y verificar que cumpla con la interfaz 
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
@@ -310,6 +316,7 @@ var usuarios;
             });
         }
         ;
+        //renderizar la tabla al agregar, editar y eliminar
         renderTabla(data) {
             const tbody = d3.select("#tabla-usuarios-body");
             const columnas = ['nombre', 'apellidoPaterno', 'apellidoMaterno', 'usuario', 'correo', 'telefono', 'id_empresa'];
@@ -386,42 +393,34 @@ var usuarios;
         ;
     }
     usuarios.Usuarios = Usuarios;
-    // true por defecto es ascendente 
+    // funcion para ordenar las columnas de manera ascendente y descendente 
     function ordenar(array, propiedad, asc = true) {
         return array.sort((a, b) => {
             const valorA = a[propiedad];
             const valorB = b[propiedad];
             if (typeof valorA === "string" && typeof valorB === "string") {
-                if (asc) {
-                    return valorA.localeCompare(valorB); // ascendente
-                }
-                else {
-                    return valorB.localeCompare(valorA); // descendente
-                }
+                if (asc)
+                    return valorA.localeCompare(valorB); // true ascendente
+                else
+                    return valorB.localeCompare(valorA); // false descendente                 
             }
             if (typeof valorA === "number" && typeof valorB === "number") {
-                if (asc) {
-                    return valorA - valorB; // ascendente
-                }
-                else {
-                    return valorB - valorA; // descendente
-                }
+                if (asc)
+                    return valorA - valorB;
+                else
+                    return valorB - valorA;
             }
             if (typeof valorA === "boolean" && typeof valorB === "boolean") {
-                if (asc) {
+                if (asc)
                     return Number(valorA) - Number(valorB);
-                }
-                else {
+                else
                     return Number(valorB) - Number(valorA);
-                }
             }
             if (valorA instanceof Date && valorB instanceof Date) {
-                if (asc) {
+                if (asc)
                     return valorA.getTime() - valorB.getTime();
-                }
-                else {
+                else
                     return valorB.getTime() - valorA.getTime();
-                }
             }
             return 0;
         });

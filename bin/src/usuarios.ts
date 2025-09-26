@@ -27,6 +27,7 @@ namespace usuarios {
             this.cargar();
         }
 
+        //Creacion de la pantalla principal y modal
         public pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "ventanaUsuarios",
@@ -53,6 +54,7 @@ namespace usuarios {
             });
         };
 
+        //Contenido del modal de usuarios
         private crearContenidoModalUsuario(): void {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
@@ -91,7 +93,7 @@ namespace usuarios {
             this._ventanaModal.mostrar();
         }
 
-        private llenarSelectEmpresasModal(idSelect: string): void {
+        public llenarSelectEmpresasModal(idSelect: string): void {
             const select = d3.select(`#${idSelect}`);
             console.log(select)
 
@@ -112,6 +114,7 @@ namespace usuarios {
                 .text(d => d.nombre);
         }
 
+        //Mostrar modal de agregar, editar o eliminar y hacer lo correspondiente
         private abrirModalUsuario(esAgregar: boolean, datosExistentesU?: I_Usuarios): void {
             this.crearContenidoModalUsuario();
 
@@ -174,7 +177,7 @@ namespace usuarios {
                 });
             this._ventanaModal.mostrar();
         };
-
+        //Controles de busqueda por nombre y empresa, boton de agregar nuevo usuario
         private crearControles(): void {
             const contenedorInput = this._conten
                 .append("div")
@@ -238,6 +241,7 @@ namespace usuarios {
             this.renderTabla(filtrados);
         }
 
+        //crear tabla base 
         private crearTabla(): void {
             const tabla = this._conten.append("table")
                 .attr("id", "tabla-usuarios")
@@ -332,6 +336,7 @@ namespace usuarios {
             };
         }
 
+        //extraer los datos y verificar que cumpla con la interfaz 
         public async cargar(recargarJson: boolean = true) {
             if (recargarJson) {
                 try {
@@ -362,6 +367,7 @@ namespace usuarios {
             }
         };
 
+        //renderizar la tabla al agregar, editar y eliminar
         public renderTabla(data: I_Usuarios[]): void {
             const tbody = d3.select("#tabla-usuarios-body");
 
@@ -435,6 +441,7 @@ namespace usuarios {
                     exit => exit.remove()
                 );
         }
+
         public abrirPantallaUsuarios(): void {
             this._ventana.mostrar();
         };
@@ -443,46 +450,33 @@ namespace usuarios {
             this._ventana.ocultar();
         };
     }
-    // true por defecto es ascendente 
+    // funcion para ordenar las columnas de manera ascendente y descendente 
     export function ordenar<T>(array: T[], propiedad: keyof T, asc: boolean = true) {
         return array.sort((a, b) => {
             const valorA = a[propiedad];
             const valorB = b[propiedad];
 
             if (typeof valorA === "string" && typeof valorB === "string") {
-                if (asc) {
-                    return valorA.localeCompare(valorB); // ascendente
-                } else {
-                    return valorB.localeCompare(valorA); // descendente
-                }
+                if (asc) return valorA.localeCompare(valorB); // true ascendente
+                else return valorB.localeCompare(valorA); // false descendente                 
             }
 
             if (typeof valorA === "number" && typeof valorB === "number") {
-                if (asc) {
-                    return valorA - valorB; // ascendente
-                } else {
-                    return valorB - valorA; // descendente
-                }
+                if (asc) return valorA - valorB;
+                else return valorB - valorA; 
             }
 
             if (typeof valorA === "boolean" && typeof valorB === "boolean") {
-                if (asc) {
-                    return Number(valorA) - Number(valorB);
-                } else {
-                    return Number(valorB) - Number(valorA);
-                }
+                if (asc) return Number(valorA) - Number(valorB);
+                else return Number(valorB) - Number(valorA);
             }
 
             if (valorA instanceof Date && valorB instanceof Date) {
-                if (asc) {
-                    return valorA.getTime() - valorB.getTime();
-                } else {
-                    return valorB.getTime() - valorA.getTime();
-                }
+                if (asc) return valorA.getTime() - valorB.getTime();
+                else return valorB.getTime() - valorA.getTime();
             }
             return 0;
         });
 
     };
-
 }

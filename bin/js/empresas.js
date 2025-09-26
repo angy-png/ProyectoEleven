@@ -20,13 +20,26 @@ var empresas;
             this.crearTabla();
             this.cargar();
         }
+        // onEmpresasChange guarda internamente la función que se le 
+        // pasó desde apps.ts
         setOnEmpresasChange(callback) {
             this.onEmpresasChange = callback;
         }
+        // Ejecuta el callback registrado
+        // Se llama cuando algo cambia (ej. agregar/eliminar empresa)
+        // y dispara renderTabla y llenarSelectEmpresas automáticamente
         notificarCambio() {
             if (this.onEmpresasChange)
                 this.onEmpresasChange();
         }
+        //Extrae lo que contiene mapa
+        getEmpresas() {
+            console.log("Empresas cargadas");
+            console.log(this.empresas);
+            return this.empresas;
+        }
+        ;
+        //Pantallas principales
         pantPrincipal() {
             this._ventana = new ventanaControl.ventanaControl({
                 id: "VentanaEmpresas",
@@ -53,6 +66,7 @@ var empresas;
             });
         }
         ;
+        //Contenido del modal de empresas
         crearContenidoModalEmpresa() {
             this._ventanaModal.limpiarContenido();
             const modal = this._ventanaModal._contenido;
@@ -76,6 +90,7 @@ var empresas;
             this._ventanaModal.mostrar();
         }
         ;
+        //Mostrar modal de agregar, editar o eliminar y hacer lo correspondiente
         abrirModalEmpresa(esAgregar, datosExistentes) {
             this.crearContenidoModalEmpresa();
             d3.select("#titulo-modal-empre").text(esAgregar ? "Agregar empresa" : "Editar empresa");
@@ -131,12 +146,16 @@ var empresas;
             this._ventanaModal.mostrar();
         }
         ;
+        //Controles de busqueda por nombre y boton de agregar nueva empresa
         crearControles() {
             const contenedorInput = this._conten
                 .append("div")
                 .style("display", "flex")
                 .style("gap", "10px");
-            const inputTexto = contenedorInput.append("input").attr("type", "text").attr("placeholder", "Filtrar por nombre");
+            const inputTexto = contenedorInput
+                .append("input")
+                .attr("type", "text")
+                .attr("placeholder", "Filtrar por nombre");
             const aplicarFiltro = () => {
                 const textoBusqueda = inputTexto.property("value") || "";
                 this.filtrar(textoBusqueda);
@@ -161,10 +180,7 @@ var empresas;
             this.renderTabla(filtrados);
         }
         ;
-        getEmpresas() {
-            return this.empresas;
-        }
-        ;
+        //Crear la tabla base 
         crearTabla() {
             const tabla = this._conten.append("table")
                 .attr("id", "tabla-empresas")
@@ -244,6 +260,7 @@ var empresas;
             };
         }
         ;
+        //extraer los datos y verificar que cumpla con la interfaz 
         cargar() {
             return __awaiter(this, arguments, void 0, function* (recargarJson = true) {
                 if (recargarJson) {
@@ -262,7 +279,7 @@ var empresas;
                                 fechaRegistro: item.fechaRegistro ? new Date(item.fechaRegistro) : new Date()
                             };
                             this.empresas.set(empreNueva.id, empreNueva);
-                            console.log("nueva emp" + empreNueva.fechaRegistro);
+                            console.log("nueva empresa" + empreNueva.fechaRegistro);
                         }
                     }
                     catch (error) {
@@ -273,6 +290,7 @@ var empresas;
             });
         }
         ;
+        //renderizar la tabla al agregar, editar y eliminar
         renderTabla(data) {
             const tbody = d3.select("#tabla-empresas-body");
             const columnas = ["nombre", "rfc", "telefono", "activo", "fechaRegistro"];
@@ -294,9 +312,8 @@ var empresas;
                     .style("cursor", "pointer")
                     .on("click", (event, d) => {
                     const usuarioActualizado = this.empresas.get(d.id);
-                    if (usuarioActualizado) {
+                    if (usuarioActualizado)
                         this.abrirModalEmpresa(false, usuarioActualizado);
-                    }
                 });
                 acciones.append("img")
                     .attr("src", "images/eliminar.svg")
