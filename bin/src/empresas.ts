@@ -103,7 +103,6 @@ namespace empresas {
                 .text("Guardar")
                 .attr("id", "btn-guardar-empre")
                 .style("margin-right", "10px");
-
             this._ventanaModal.mostrar();
         };
 

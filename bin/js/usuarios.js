@@ -136,7 +136,7 @@ var usuarios;
             const modal = this._ventanaModal._contenido;
             modal.append("h2").text("Confirmar eliminación");
             modal.append("p")
-                .text(`¿Estás seguro de que deseas eliminar la empresa "${usuario.nombre}"?`)
+                .text(`¿Estás seguro de que deseas eliminar el usuario "${usuario.nombre}"?`)
                 .style("margin-bottom", "20px");
             const botones = modal.append("div").style("display", "flex").style("gap", "10px");
             botones.append("button")

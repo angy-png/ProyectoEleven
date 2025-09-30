@@ -30,6 +30,7 @@ namespace app {
                         // Aquí se le pasa a setOnEmpresasChange una función que llama a renderTabla y llenarSelectEmpresas
                         this._empre.setOnEmpresasChange(() => {
                             this._user!.renderTabla(Array.from(this._user!.usuarios.values()));
+                           //! que no es nulo 
                             this._user!.llenarSelectEmpresas();
                         });
                     }

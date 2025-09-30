@@ -162,7 +162,7 @@ namespace usuarios {
 
             modal.append("h2").text("Confirmar eliminación");
             modal.append("p")
-                .text(`¿Estás seguro de que deseas eliminar la empresa "${usuario.nombre}"?`)
+                .text(`¿Estás seguro de que deseas eliminar el usuario "${usuario.nombre}"?`)
 
                 .style("margin-bottom", "20px");
 
